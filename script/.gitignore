@@ -2,3 +2,8 @@
 script/*
 *.mpg
 *.*~
+pict*.png
+*.js
+*.pdf
+compiled/*
+*.css
