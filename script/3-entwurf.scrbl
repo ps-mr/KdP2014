@@ -145,16 +145,17 @@ Da die Zahl der Zuschauer wiederum vom Eintrittspreis abhängt, muss
 diese Funktion auch den Ticketpreis als Eingabeparameter entgegennehmen
 und verwendet die bereits definierte @racket[attendees] Funktion:
 
+@margin-note{Dieses Programm enthält diverse @italic{magic numbers}. Eliminieren Sie
+             diese durch entsprechende Konstantendefinitionen!}
 @racketblock[    
 (define (cost ticket-price)
    (+ 180 (* 0.04 (attendees ticket-price))))]
+
 
 Der Gewinn ist schliesslich die Differenz zwischen Umsatz und Kosten.
 Da wir bereits Funktionen für die Berechnung von Umsatz und Kosten haben,
 muss diese Funktion all die Werte als Eingabe bekommen, die diese Funktionen
 benötigen --- in diesem Fall ist dies der Eintrittspreis:
-@margin-note{Dieses Programm enthält diverse @italic{magic numbers}. Eliminieren Sie
-             diese durch entsprechende Konstantendefinitionen!}
 
 @racketblock[    
 (define (profit ticket-price)
@@ -301,7 +302,7 @@ Hier sind einige Beispiele für Datendefinitionen:
   ; interp. the number of pixels moved per clock tick
 
   ; Temperature is a Number.
-  ; interp. degrees Fahrenheit
+  ; interp. degrees Celsius
 
   ; Length is a Number.
   ; interp. the length in centimeters
@@ -314,6 +315,23 @@ Hier sind einige Beispiele für Datendefinitionen:
 Zum jetzigen Zeitpunkt kennen Sie nur einige wenige Formen von Daten (Zahlen, Strings, Bilder, Wahrheitswerte), daher
 müssen Sie alle Informationen mit diesen Datentypen repräsentieren. Später werden wir andere Datentypen kennenlernen,
 in denen es deutlich anspruchsvoller wird, eine geeignete Repräsentation für seine Informationen zu wählen.
+
+Oft ist es hilfreich, Datenbeispiele zu einer Datendefinition anzugeben. 
+
+
+@#reader scribble/comment-reader
+(racketblock
+  ; Temperature is a Number.
+  ; interp. degrees Celsius
+  ; Examples:
+  (define sunny-weather 25)
+  (define bloody-cold -5)
+)
+
+
+Die Definition von Datenbeispielen hat zwei Vorteile: 1) Sie helfen, eine Datendefinition zu verstehen. Beispielsweise könnte es sein, dass Sie 
+versehentlich ihre Datendefinition so gestaltet haben, dass es gar keine Datenbeispiele gibt. 2) Sie können die Beispiele
+in Tests von Funktionen verwenden, die solche Daten konsumieren oder produzieren.
 
 @subsection[#:tag "entwurfsrezept"]{Entwurfsrezept zur Funktionsdefinition}
 
