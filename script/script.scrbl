@@ -11,3 +11,5 @@ mit Beiträgen von Yufei Cai, Yi Dai und Tillmann Rendel
 @include-section["2-ea.scrbl"]
 @include-section["3-entwurf.scrbl"]
 @include-section["4-batchuniverse.scrbl"]
+@include-section["5-data.scrbl"]
+@include-section["6-structs.scrbl"]
