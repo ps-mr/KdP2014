@@ -5,7 +5,7 @@
 @(require (for-label (except-in 2htdp/image image?)))
 @(require (for-label 2htdp/universe))
    
-@title[#:version ""]{Datendefinition durch Alternativen}
+@title[#:version "" #:tag "summentypen"]{Datendefinition durch Alternativen: Summentypen}
 
 @margin-note{Dieser Teil des Skripts basiert auf [HTDP/2e] Kapitel 4}
 

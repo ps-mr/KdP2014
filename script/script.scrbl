@@ -13,3 +13,5 @@ mit Beiträgen von Yufei Cai, Yi Dai und Tillmann Rendel
 @include-section["4-batchuniverse.scrbl"]
 @include-section["5-data.scrbl"]
 @include-section["6-structs.scrbl"]
+@include-section["7-polynomials.scrbl"]
+@include-section["8-semanticsbsl.scrbl"]
