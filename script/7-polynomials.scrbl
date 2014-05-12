@@ -114,10 +114,14 @@ In unserem Beispiel sehen die Implementationen dieser Hilfsfunktionen wie folgt 
 @margin-note{Ergänzen Sie die Definitionen für @racket[vector-length] und @racket[posn-]!}
 @#reader scribble/comment-reader
 (racketblock
+; GCircle Posn -> Boolean
+; Determines whether a point is inside a circle
 (define (point-inside-circle circle point)
   (<= (vector-length (posn- (gcircle-center circle) point)) 
       (gcircle-radius circle)))
 
+; GRectangle Posn -> Boolean
+; Determines whether a point is inside a rectangle
 (define (point-inside-rectangle rectangle point)
   (and
    (<= (posn-x (grectangle-corner-ul rectangle))
@@ -196,8 +200,11 @@ Das Entwurfsrezept aus Abschnitt @secref{entwurfsrezept} ergänzen wir wie folgt
        @item{Im zweiten Schritt, der Definition der Funktionssignatur und der Aufgabenbeschreibung,
              ändert sich nichts --- allerdings können und sollten Sie nun natürlich die Namen
              der definierten ADTs verwenden.}
-       @item{Nichts ändert sich im dritten Schritt. Wie immer bei Summentypen sollten Sie mindestens
-             einen Test pro Alternative definieren.}
+       @item{Bei der Definition der Testcases sollten Sie bei Summentypen mindestens
+             einen Test pro Alternative definieren. Beachten Sie, dass es durch die Schachtelung von 
+             Summen- und Produkttypen jetzt möglicherweise viel mehr Alternativen gibt. Bei sehr großen
+             Datentypen ist es unter Umständen nicht mehr realistisch, jede Alternative zu testen, weil im
+             schlechtesten Fall die Menge der Alternativen exponentiell mit der Tiefe des Datentypen wächst.}
        @item{Bei der Definition des Funktionstemplates gibt es nun zwei Dimensionen: Den Summentyp
              und die Produkttypen in (einigen seiner) Alternativen.
              
@@ -215,10 +222,15 @@ Das Entwurfsrezept aus Abschnitt @secref{entwurfsrezept} ergänzen wir wie folgt
              Allerdings gibt es einen wichtigen Fall, in dem sie @italic{keinen} @racket[cond] Ausdruck
              zur Unterscheidung der Alternativen ins Template aufnehme sollte, nämlich dann, wenn es möglich
              ist, die Funktion abstrakt zu formulieren --- sie also die Fälle nicht unterscheiden, sondern
-             lediglich bereits existierende Funktionen aufrufen, die auch auf Basis des Polynomtyps implementiert
+             lediglich bereits existierende Funktionen aufrufen, die auch auf Basis des ADTs implementiert
              wurden. Als Beispiel haben wir die @racket[overlap/3] Funktion gesehen.}
        @item{In diesem Schritt sollten sie aus dem Template ein lauffähiges Programm machen. Da sie im vorherigen
              Schritt eventuell Templates für Hilfsfunktionen definiert haben, müssen sie auch diese Hilfsfunktionen
              nun implementieren.}
-       @item{Testen sie. Falls Tests fehlschlagen, gehen sie zurück zum vorherigen Schritt.}]
+       @item{Testen sie. Falls Tests fehlschlagen, gehen sie zurück zum vorherigen Schritt.}
+       @item{Überprüfen Sie beim Refactoring zusätzlich die neu definierten ADTs. Auch hier kann es Verstöße gegen 
+             das DRY-Prinzip geben, z.B. wenn es große Gemeinsamkeiten zwischen ADTs gibt. Gibt es beispielsweise
+             in mehreren Datentypen zwei Felder zur Repräsentation von Koordinaten, so bietet es sich an, stattdessen
+             die @racket[posn] Struktur zu verwenden. Vermeiden Sie sehr breite aber flache ADTs; die logische Gruppierung
+             der Daten durch eine Hierarchie von ADTs fördert die Wiederverwendbarkeit und Lesbarkeit des Codes.}]
              

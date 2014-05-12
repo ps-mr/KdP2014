@@ -212,7 +212,7 @@ Man könnte versuchen, auch @racket[and] noch wegzutransformieren und durch eine
 wird transformiert zu @racket[(cond [e-1 e-2])]. Zwar simuliert dies korrekt die Auswertungsreihenfolge, aber diese Transformation ist nicht adäquat für
 das in DrRacket implementierte Verhalten, wie folgendes Beispiel illustriert:
 
-@ex[(and true 42)]
+@interaction[#:eval (bsl-eval) (and true 42)]
 
 @ex[(cond [true 42])]
 
@@ -274,7 +274,9 @@ Betrachten wir als Beispiel den Ausdruck @racket[(* (+ 1 2) (+ 3 4))]. Der Unter
 und kann zu @racket[3] ausgewertet werden. Gemäß der Kongruenzregel kann ich den Gesamtausdruck also zu @racket[(* 3 (+ 3 4))] reduzieren.
 
 Wir werden Auswertungspositionen und die Kongruenzregel durch einen @italic{Auswertungskontext} formalisieren. Ein Auswertungskontext ist
-eine Grammatik für Programme, die ein "Loch", @litchar{[]}, enthalten. Die Grammatik ist so strukturiert, dass jedes Element
+eine Grammatik für Programme, die ein "Loch", @litchar{[]}, enthalten. In Bezug auf den DrRacket Stepper kann man den
+Auswertungskontext als den während einer Reduktion nicht farblich markierten Teil des Ausdrucks verstehen. 
+Die Grammatik ist so strukturiert, dass jedes Element
 der definierten Sprache genau ein "Loch" enthält.
 
 @BNF[(list @nonterm{E} 
@@ -682,10 +684,99 @@ Beispiel: Betrachten Sie folgendes Programm:
 Da @racket[(f 1)] @step @racket[(f 1)], terminiert die Berechnung des Arguments für @racket[g] nicht, und gemäß der Kongruenzregel
 gilt damit @racket[(g (f 1))] @step @racket[(g (f 1))], daher terminiert die Berechnung des Ausdrucks @racket[(g (f 1))] @step @racket[(g (f 1))] nicht.
 Auf der anderen Seite gilt jedoch gemäß @italic{(EFUN)} @racket[(g (f 1))] @equiv 42. Man muss daher bei der Verwendung der Gleichheitsregeln
-berücksichtigen, dass diese das Terminierungsverhalten des Programms verändern können.
+berücksichtigen, dass die Gleichheit nur unter der Voraussetzung gilt, dass die Terme auf beiden Seiten terminieren..
 
 Es gilt jedoch folgende etwas schwächere Eigenschaft, die wir ohne Beweis aufführen:
 
 Falls @mv{e-1} @equiv @mv{e-2} und @mv{e-1} @multistep @mv{v-1} und @mv{e-2} @multistep @mv{v-2}, dann @mv{v1} = @mv{v2}.
 
 Wenn also @mv{e-1} und @mv{e-2} gleich sind und beide terminieren, dann ist der Wert, der herauskommt, gleich.
+
+@subsection{Refactoring von algebraischen Datentypen}
+Algebraische Datentypen sind Kombinationen von Produkttypen und Summentypen. Zwei (algebraische) Datentypen können @italic{isomorph} sein.
+Dies bedeutet, dass es eine bijektive Abbildung zwischen den Datentypen gibt und Programme, die den einen Datentyp verwenden, so umgebaut werden können, dass sie stattdessen den anderen verwenden.
+
+Beispiel: Betrachten Sie die folgenden drei Definitionen für einen Datentyp @italic{Student}:
+@#reader scribble/comment-reader
+(racketblock
+(define-struct student1 (lastname firstname matnr))
+; a Student1 is: (make-student String String Number)
+; interp. lastname, firstname, and matrikel number of a student
+
+(define-struct student2 (matnr lastname firstname))
+; a Student2 is: (make-student Number String String)
+; interp. matrikel number, lastname, and firstname of a student
+
+(define-struct fullname (firstname lastname))
+; a FullName is: (make-fullname String String)
+; interp. first name and last name of a person
+
+(define-struct student3 (fullname matnr))
+; a Student3 is: (make-student FullName Number)
+; interp. full name and matrikel number of a student                                                                                           
+)
+
+
+Jede der drei Repräsentationen kann die gleichen Informationen darstellen. Programme, die einen dieser Typen verwenden können so refactored werden, dass sie einen der beiden anderen verwenden.
+Was wir an @italic{Student1} und @italic{Student2} sehen, ist, dass Produkttypen, die sich nur in der Reihenfolge der Komponenten unterscheiden, isomorph sind: Wir könnten zwischen den Datentypen
+hin- und herkonvertieren,
+@#reader scribble/comment-reader
+(racketblock
+; Student1 -> Student2
+(define (Student1ToStudent2 s) 
+  (make-student2 (student1-matnr s) (student1-lastname s) (student1-firstname s)))              
+
+; Student2 -> Student1
+(define (Student2ToStudent1 s) 
+  (make-student1 (student1-lastname s) (student1-firstname s) (student1-matnr s)))              
+)
+
+und wir können Programme, die @italic{Student1} verwenden, so refactoren, dass sie stattdessen @italic{Student2} verwenden, nämlich indem die entsprechenden Konstruktoren und Selektoren angepasst werden.
+
+Das dritte Beispiel, @italic{Student3}, zeigt, dass wir Daten gruppieren und in separate Datentypen auslagern können. Auch hier gibt es eine Bijektion und ein offensichtliches Refactoring des Programms.
+
+Wenn wir im Allgemeinen Fall solche Typisomorphien betrachten, spielen offensichtlich die verwendeten Namen für die Struktur und die Komponenten keine Rolle. 
+Wir könnten für diesen Zweck Produkttypen so schreiben: @racket[(* String String Number)] statt @racket[(define-struct student (firstname lastname matnr))].
+Analog dazu können wir Summentypen mit der @racket[+] Notation beschreiben: Statt
+
+@#reader scribble/comment-reader
+(racketblock
+; A UniversityPerson is either:
+; - a Student
+; - a Professor
+; - a ResearchAssociate
+)
+schreiben wir @racket[(+ Student Professor ResearchAssociate)].
+
+In dieser Notation können wir die Typisomorphien auf algebraischen Datentypen wie folgt ausdrücken.
+Wenn @racket[X], @racket[Y] und @racket[Z] beliebige Typen sind, dann gelten folgende Isomorphien:
+
+@#reader scribble/comment-reader
+(racketblock
+; Assoziativität von *
+(* X (* Y Z)) = (* (* X Y) Z) = (* X Y Z)
+
+; Kommutativität von *
+(* X Y) = (* Y X)
+
+; Assoziativität von +
+(+ X (+ Y Z)) = (+ (+ X Y) Z) = (+ X Y Z)
+
+; Kommutativität von +
+(+ X Y) = (+ Y X)
+
+; Distributivität von * und +
+(* X (+ Y Z)) = (+ (* X Y) (* X Z))
+)
+
+Es ist kein Zufall, dass wir mit Typen rechnen als wären es Ausdrücke in der Algebra 
+(daher kommt übrigens der Name "algebraische Datentypen"). Wenn man Summentypen als
+sogenannte "tagged unions" definiert (also die Alternativen immer durch Tags unterschieden 
+werden können), so geht diese Analogie sogar noch viel weiter. Wenn man beispielsweise
+die Datentypen, die nur ein einiges Element haben, als @racket[1] bezeichnet und
+Datentypen mit zwei Elementen (wie Boolean) als @racket[2], gelten auch Isomorphien
+wie @racket[(+ 1 1) = 2] oder @racket[(+ X X) = (* 2 X)]. 
+
+Die oben stehenden Isomorphien rechtfertigen eine große Klasse von Refactorings von
+algebraischen Datentypen: Vertauschung von Reihenfolgen, "Inlining" bzw. "Outsourcing" von Datentypen,
+"Ausmultiplikation" von Produkten.
