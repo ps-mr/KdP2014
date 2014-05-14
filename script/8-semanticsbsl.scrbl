@@ -9,6 +9,7 @@
 @(require scribble/decode
           scribble/html-properties
           scribble/latex-properties)
+@(require scriblib/footnote)
    
 @(define inbox-style
     (make-style "InBox"
@@ -106,7 +107,13 @@ Jeder Ableitungsbaum steht für einen Text (häufig @italic{Wort} oder @italic{S
 nämlich die Sequenz der Terminalsymbole, die in dem Baum vorkommen, von links nach rechts im Baum abgelesen. Die durch eine Grammatik definierte Sprache ist 
 die Menge aller Worte, für die man Ableitungsbäume bilden kann.
 
-Hier einige Beispiele für Ableitungsbäume des Nichtterminals @nonterm{Zahl} und die Worte, die sie repräsentieren.
+Hier einige Beispiele für Ableitungsbäume@note{Wenn Sie mit Grammatiken und Ableitungsbäumen experimentieren möchten, schauen Sie sich mal
+                                                   das Grammatik-Werkzeug unter @url{http://ozark.hendrix.edu/~burch/proj/grammar/} an. Mit diesem 
+                                                   Werkzeug können Sie automatisch Ableitungsbäume für Wörter kontextfreier Grammatiken eingeben.
+                                                   Die Notation für kontextfreie Grammatiken in dem Tool ist allerdings etwas anders und sie u
+                                                   nterstützt nicht die + und * Operatoren sowie nur alphanumerische Nichtterminale. Die Grammatik
+                                                   von oben könnte in dem Tool wie folgt kodiert werden:}                                                   
+des Nichtterminals @nonterm{Zahl} und die Worte, die sie repräsentieren.
 Wir stellen die Bäume der Einfachheit halber durch Einrückung des Textes dar. Da damit die Bäume um 90 Grad gegenüber der Standarddarstellung gedreht sind,
 müssen die Terminalsymbole von oben nach unten (statt von links nach rechts) abgelesen werden.
 
@@ -173,7 +180,7 @@ Kontext abstrakter Syntax häufig als @italic{abstrakte Syntaxbäume} (@italic{a
          @nonterm{image})]
 
 Das Nichtterminal @nonterm{program} steht für die Syntax ganzer Programme; @nonterm{def-or-expr} für Definitionen oder Ausdrücke,
-@nonterm{definition} für Funktions/Variablen/Strukturdefinitionen, @nonterm{e} für Ausdrücke und @nonterm{v} für Werte.
+@nonterm{definition} für Funktions-/Konstanten-/Strukturdefinitionen, @nonterm{e} für Ausdrücke und @nonterm{v} für Werte.
 
 Die geschweiften Klammern um Teilsequenzen wie in @kleeneplus[@BNF-group[@BNF-seq[lb @nonterm{e} @nonterm{e} rb ] ]] dienen dazu,
 um den  @kleenestar[] oder @kleeneplus[] Operator auf eine ganze Sequenz von Terminalsymbolen und Nichtterminalen anzuwenden und nicht nur
@@ -181,7 +188,7 @@ auf ein einzelens Nichtterminal. In diesem Beispiel bedeutet es, dass 1 oder meh
 erwartet werden.
 
 Die Produktionen für einige Nichtterminale, deren genaue Form nicht interessant ist, wurden in der Grammatik ausgelassen: 
-@nonterm{name} steht für die zugelassenen Bezeichner für Funktionen, Strukturen und Variablen. @nonterm{number}
+@nonterm{name} steht für die zugelassenen Bezeichner für Funktionen, Strukturen und Konstanten. @nonterm{number}
 steht für die zugelassenen Zahlen. @nonterm{boolean} steht für @racket[true] oder @racket[false]. @nonterm{string} steht
 für alle Strings wie @racket["asdf"]. Das Nichtterminal @nonterm{image} steht für Bilder im Programmtext (Bildliterale) wie @ev[rocket].
 
@@ -209,12 +216,12 @@ werden als die Argumente normaler Funktionen. Allerdings ist es in unserer Kerns
 mit Hilfe von @racket[and] und @racket[not] ausgedrückt werden kann. Wir "entzuckern" @racket[(or e-1 ... e-n)] also zu @racket[(not (and (not e-1) ... (not e-n)))].
 
 Man könnte versuchen, auch @racket[and] noch wegzutransformieren und durch einen @racket[cond] Ausdruck zu ersetzen: @racket[(and e-1 e-2)]
-wird transformiert zu @racket[(cond [e-1 e-2])]. Zwar simuliert dies korrekt die Auswertungsreihenfolge, aber diese Transformation ist nicht adäquat für
+wird transformiert zu @racket[(cond [e-1 e-2] [else false])]. Zwar simuliert dies korrekt die Auswertungsreihenfolge, aber diese Transformation ist nicht adäquat für
 das in DrRacket implementierte Verhalten, wie folgendes Beispiel illustriert:
 
 @interaction[#:eval (bsl-eval) (and true 42)]
 
-@ex[(cond [true 42])]
+@ex[(cond [true 42] [else false])]
 
 
 Damit sieht die Grammatik unserer Kernsprache wie folgt aus. Die Grammatik für Werte @nonterm{v} bleibt unverändert.
@@ -249,8 +256,8 @@ Sofern in Ausdrücken Funktionen, Konstanten, oder Strukturen benutzt werden, ka
 stattfinden, sondern man muss die @italic{Umgebung} (@italic{Environment}, im folgenden als @italic{env} abgekürzt) kennen, 
 in dem der Ausdruck ausgewertet wird, um Zugriff auf die dazugehörigen Definitionen
 zu haben. Vom Prinzip her ist die Umgebung einfach der Teil des Programms bis zu dem Ausdruck, der gerade ausgewertet wird. Allerdings 
-werden Variablendefinitionen ja auch ausgewertet (siehe @secref{semanticsofvardefs}). Dies bringen wir durch folgende Definition
-zum Ausdruck. Beachten Sie, dass im Unterschied zur Grammatik von BSL Variablendefinitionen die Form 
+werden Konstantenfinitionen ja auch ausgewertet (siehe @secref{semanticsofvardefs}). Dies bringen wir durch folgende Definition
+zum Ausdruck. Beachten Sie, dass im Unterschied zur Grammatik von BSL Konstantendefinitionen die Form 
 @BNF-seq[open @litchar{define} @nonterm{name} @nonterm{v} close] und nicht @BNF-seq[open @litchar{define} @nonterm{name} @nonterm{e} close] haben.
 
 @BNF[(list @nonterm{env}
@@ -260,8 +267,8 @@ zum Ausdruck. Beachten Sie, dass im Unterschied zur Grammatik von BSL Variablend
          @BNF-seq[open @litchar{define} @nonterm{name} @nonterm{v} close]
          @BNF-seq[open @litchar{define-struct} @nonterm{name} open @kleeneplus[@nonterm{name}] close close])]
          
-Ein Umgebung besteht also aus einer Sequenz von Funktions-, Variablen- oder Strukturdefinitionen, wobei
-der Ausdruck in Variablendefinitionen bereits zu einem Wert ausgewertet wurde.
+Ein Umgebung besteht also aus einer Sequenz von Funktions-, Konstanten- oder Strukturdefinitionen, wobei
+der Ausdruck in Konstantendefinitionen bereits zu einem Wert ausgewertet wurde.
 
 
 @section{Auswertungspositionen und die Kongruenzregel}
@@ -351,7 +358,7 @@ Die Auswertungsregel für Programme nennen wir @italic{(PROG)}:
 @italic{(PROG): }Ein Programm wird von links nach rechts ausgeführt und startet mit der leeren Umgebung. Ist das nächste Programmelement eine Funktions- oder Strukturdefinition, so wird
 diese Definition in die Umgebung aufgenommen und die Ausführung mit dem nächsten Programmelement in der erweiterten Umgebung fortgesetzt. Ist das nächste Programmelement
 ein Ausdruck, so wird dieser gemäß der unten stehenden Regeln in der aktuellen Umgebung zu einem Wert ausgewert. Ist das nächste Programmelement 
-eine Variablendefinition @racket[(define x e)], so wird in der aktuellen Umgebung zunächst @racket[e] zu einem Wert @racket[v] ausgewertet und dann
+eine Konstantendefinition @racket[(define x e)], so wird in der aktuellen Umgebung zunächst @racket[e] zu einem Wert @racket[v] ausgewertet und dann
 @racket[(define x v)] zur aktuellen Umgebung hinzugefügt.}
 
 Beispiel: Das Programm ist:
@@ -395,16 +402,17 @@ Die Reduktionsregeln sind also:
 @italic{(FUN): }Falls @BNF-seq[open @litchar{define} open @mv{name} @mv{name-1} "..." @mv{name-n} close @mv{e} close] in der Umgebung, @linebreak[]
 dann @BNF-seq[open @mv{name} @mv{v-1} "..." @mv{v-n} close] @step @mv{e}[@mv{name-1} := @mv{v-1} ... @mv{name-n} := @mv{v-n}]}
 
-@italic{(PRIM): }@elem[#:style inbox-style]{Falls @mv{name} eine primitive Funktion @mv{f} ist und @italic{f(v-1,...,v-n)=v}, @linebreak[]
+@elem[#:style inbox-style]{
+@italic{(PRIM): }Falls @mv{name} eine primitive Funktion @mv{f} ist und @italic{f(v-1,...,v-n)=v}, @linebreak[]
 dann @BNF-seq[open @mv{name} @mv{v-1} "..." @mv{v-n} close] @step @mv{v}. 
 }
 
-@subsection{Bedeutung von Variablen}
+@subsection{Bedeutung von Konstanten}
 
-Variablen werden ausgewertet, indem sie in der Umgebung nachgeschlagen werden:
+Konstanten werden ausgewertet, indem sie in der Umgebung nachgeschlagen werden:
 
 @elem[#:style inbox-style]{
-@italic{(VAR): }Falls @BNF-seq[open @litchar{define} @mv{name} @mv{v} close] in der Umgebung, 
+@italic{(CONST): }Falls @BNF-seq[open @litchar{define} @mv{name} @mv{v} close] in der Umgebung, 
 dann @mv{name} @step @mv{v}. 
 }
 
@@ -433,11 +441,11 @@ zusammengefasst werden können. Insgesamt benötigen wir für boolsche Ausdrück
 @elem[#:style inbox-style]{
 @italic{(AND-1): }@BNF-seq[open @litchar{and} @litchar{true}  @litchar{true} close] @step @litchar{true}}
 
-@italic{(AND-2): }@elem[#:style inbox-style]{@BNF-seq[open @litchar{and} @litchar{true}  @litchar{false} close] @step @litchar{false}}
+@elem[#:style inbox-style]{@italic{(AND-2): }@BNF-seq[open @litchar{and} @litchar{true}  @litchar{false} close] @step @litchar{false}}
 
-@italic{(AND-3): }@elem[#:style inbox-style]{@BNF-seq[open @litchar{and} @litchar{false} "..." close] @step @litchar{false}}
+@elem[#:style inbox-style]{@italic{(AND-3): }@BNF-seq[open @litchar{and} @litchar{false} "..." close] @step @litchar{false}}
 
-@italic{(AND-4): }@elem[#:style inbox-style]{@BNF-seq[open @litchar{and} @litchar{true} @mv{e-1} @mv{e-2} "..." close] @step @BNF-seq[open @litchar{and} @mv{e-1} @mv{e-2} "..." close]}
+@elem[#:style inbox-style]{@italic{(AND-4): }@BNF-seq[open @litchar{and} @litchar{true} @mv{e-1} @mv{e-2} "..." close] @step @BNF-seq[open @litchar{and} @mv{e-1} @mv{e-2} "..." close]}
 
 
 
@@ -505,7 +513,7 @@ die Umgebung im nächsten Schritt @mv{env} = @racket[(define-struct s (x y))].}
                     [true x]))]
 }
 
-@item{Das nächste Programmelement ist eine Variablendefinition. Gemäß @italic{(PROG)}
+@item{Das nächste Programmelement ist eine Konstantendefinition. Gemäß @italic{(PROG)}
 müssen wir also zunächst @racket[(make-s 5 (+ (* 2 3) 4))] auswerten:
 @itemlist[
 @item{@mv{e} = @racket[(make-s 5 (+ (* 2 3) 4))] zerfällt in
