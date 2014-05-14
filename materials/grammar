@@ -1,3 +1,7 @@
+# This is a variant of the grammar from section 8.2 of the script
+# that can be used with the grammar tool available at
+# http://ozark.hendrix.edu/~burch/proj/grammar/
+
 ZAHL -> POSITIVEZAHL | minus POSITIVEZAHL
 POSITIVEZAHL -> GANZEZAHL | KOMMAZAHL
 GANZEZAHL -> ZIFFERNICHTNULL ZIFFERLIST
