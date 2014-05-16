@@ -111,8 +111,8 @@ Hier einige Beispiele für Ableitungsbäume@note{Wenn Sie mit Grammatiken und Ab
                                                    das Grammatik-Werkzeug unter @url{http://ozark.hendrix.edu/~burch/proj/grammar/} an. Mit diesem 
                                                    Werkzeug können Sie automatisch Ableitungsbäume für Wörter kontextfreier Grammatiken eingeben.
                                                    Die Notation für kontextfreie Grammatiken in dem Tool ist allerdings etwas anders und sie u
-                                                   nterstützt nicht die + und * Operatoren sowie nur alphanumerische Nichtterminale. Die Grammatik
-                                                   von oben könnte in dem Tool wie folgt kodiert werden:}                                                   
+                                                   nterstützt nicht die + und * Operatoren sowie nur alphanumerische Nichtterminale. Eine Variante
+                                                   der Grammatik oben, die dieses Tool versteht, finden Sie unter der URL @url{https://github.com/ps-mr/KdP2014/blob/master/materials/grammar}.}                                                   
 des Nichtterminals @nonterm{Zahl} und die Worte, die sie repräsentieren.
 Wir stellen die Bäume der Einfachheit halber durch Einrückung des Textes dar. Da damit die Bäume um 90 Grad gegenüber der Standarddarstellung gedreht sind,
 müssen die Terminalsymbole von oben nach unten (statt von links nach rechts) abgelesen werden.

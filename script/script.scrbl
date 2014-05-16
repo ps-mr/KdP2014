@@ -15,3 +15,5 @@ mit Beiträgen von Yufei Cai, Yi Dai und Tillmann Rendel
 @include-section["6-structs.scrbl"]
 @include-section["7-polynomials.scrbl"]
 @include-section["8-semanticsbsl.scrbl"]
+@include-section["9-recdatastructures.scrbl"]
+@include-section["10-sepxs.scrbl"]
