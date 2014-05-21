@@ -4,6 +4,7 @@
 @(require (for-label lang/htdp-beginner))
 @(require (for-label (except-in 2htdp/image image?)))
 @(require (for-label 2htdp/universe))
+@(require scriblib/footnote)
    
 @title[#:version ""]{Daten beliebiger Größe}
 
@@ -30,7 +31,7 @@ wir uns damit, wie wir Daten beliebiger (und zum Zeitpunkt des Programmierens un
 Größe repräsentieren und Funktionen, die solche Daten verarbeiten, programmieren können.
 
 
-@section{Rekursive Datentypen}
+@section[#:tag "rekursivedatentypen"]{Rekursive Datentypen}
 
 Betrachten wir als Beispiel ein Programm, mit dem Stammbäume von Personen verwaltet werden können.
 Jede Person im Stammbaum hat einen Vater und eine Mutter; manchmal sind Vater oder Mutter einer
@@ -76,7 +77,7 @@ Erstmal ist nicht ganz klar, was das bedeuten soll. Vor allen Dingen ist aber au
 klar, wie wir einen Stammbaum erzeugen sollen. Wenn wir versuchen, einen zu erzeugen,
 bekommen wir ein Problem:
 
-@racket[(make-familytree "Heinz" (make-familytree "Horst" (make-familytree "Joe" ...)))]
+@racket[(make-person "Heinz" (make-person "Horst" (make-person "Joe" ...)))]
 
 Wir können überhaupt gar keinen Stammbaum erzeugen, weil wir zur Erzeugung bereits einen
 Stammbaum haben müssen. Ein Ausdruck, der einen Stammbaum erzeugt, wäre also unendlich groß.
@@ -132,7 +133,7 @@ Aus dieser Mengenkonstruktion wird auch klar, wieso rekursive Datentypen es erm�
 Größe zu repräsentieren: Jede Menge ft@subscript{i} enthält die Werte, deren maximale Tiefe in Baumdarstellung i ist.
 Da wir alle ft@subscript{i} miteinander vereinigen, ist die Tiefe (und damit auch die Größe) unbegrenzt.
 
-@section{Programmieren mit rekursiven Datentypen}
+@section[#:tag "programmieren-rekdt"]{Programmieren mit rekursiven Datentypen}
 
 Im letzten Abschnitt haben wir gesehen, wie man rekursive Datentypen definiert, was sie bedeuten, und wie man Instanzen
 dieser Datentypen erzeugt. Nun wollen wir überlegen, wie man Funktionen programmieren kann, die Instanzen
@@ -145,7 +146,7 @@ Eine Signatur, Aufgabenbeschreibung und Tests sind dazu schnell definiert:
 
 @#reader scribble/comment-reader
 (racketblock
-; FamilyTree -> Boolean
+; FamilyTree String -> Boolean
 ; determines whether person p has an ancestor a
 (check-expect (person-has-ancestor HEINZ "Joe") true)
 (check-expect (person-has-ancestor HEINZ "Emil") false)
@@ -653,6 +654,275 @@ Dieses Template zu vervollständigen ist nun nur noch ein kleiner Schritt:
   (cond [(zero? n) empty]
         [(positive? n) (cons x (iterate-value (sub1 n) x))]))]
 
-@section{Das neue Entwurfsrezept}
 
-Lesen Sie hierzu Abschnitt @hyperlink["http://www.ccs.neu.edu/home/matthias/HtDP2e/htdp2e-part2.html#%28part._design~3alists%29"]{4.2 in HTDP/2e}.
+@section{Mehrere rekursive Datentypen gleichzeitig}
+Ein schwierigerer Fall ist es, wenn mehrere Parameter einer Funktion einen rekursiven Datentyp haben. In diesem Fall ist es meist
+sinnvoll, einen dieser Parameter zu bevorzugen und zu ignorieren, dass andere Parameter ebenfalls rekursiv sind. Welcher
+Parameter bevorzugt werden sollte, ergibt sich aus der Fragestellung, wie sie die Eingabe der Funktion am sinnvollsten zerlegen
+können, so dass Sie aus dem Ergebnis des rekursiven Aufrufs und den anderen Parametern am einfachsten das Gesamtergebnis
+berechnen können.
+
+Betrachten wir als Beispiel eine Funktion zur Konkatenation von zwei Listen. Diese Funktion ist unter dem Namen @racket[append]
+bereits eingebaut, aber wir bauen sie mal nach. Wir haben zwei Parameter, die beide rekursive Datentypen haben.
+Eine Möglichkeit wäre, den ersten Parameter zu bevorzugen. Damit erhalten wir folgendes Template:
+@#reader scribble/comment-reader
+(racketblock
+; [X] (list-of X) (list-of X) -> (list-of X)
+; concatenates l1 and l2
+(check-expect (lst-append (list 1 2) (list 3 4)) (list 1 2 3 4))             
+(define (lst-append l1 l2)
+  (cond [(empty? l1) ...l2...]
+        [(cons? l1) ... (first l1) ... (lst-append (rest l1) ...)]))
+)
+
+Tatsächlich ist es in diesem Fall leicht, das Template zu vervollständigen. Wenn wir das Ergebnis von
+@racket[(lst-append (rest l1) l2)] haben, so müssen wir nur noch @racket[(first l1)] vorne anhängen:
+
+@racketblock[
+(define (lst-append l1 l2)
+  (cond [(empty? l1) l2]
+        [(cons? l1) (cons (first l1) (lst-append (rest l1) l2))]))
+]
+
+Spielen wir jetzt einmal die zweite Möglichkeit durch: Wir bevorzugen den zweiten Parameter. Damit ergibt
+sich folgendes Template:
+@racketblock[
+(define (lst-append l1 l2)
+  (cond [(empty? l2) ...l1...]
+        [(cons? l2) ... (first l2) ... (lst-append .. (rest l2))]))
+]
+Der Basisfall ist zwar trivial, aber im rekursiven Fall ist es nicht offensichtlich, wie wir das Template vervollständigen können. Betrachten wir beispielsweise
+den rekursiven Aufruf @racket[(lst-append l1 (rest l2))], so können wir überlegen, dass uns dieses Ergebnis
+überhaupt nicht weiterhilft, denn wir müssten ja irgendwo in der Mitte (aber wo genau ist nicht klar) des Ergebnisses 
+noch @racket[(first l2)] einfügen.
+
+@section{Entwurfsrezept für Funktionen mit rekursiven Datentypen}
+
+Wir haben gesehen, wie wir mit Hilfe eines Entwurfsrezepts einfache Funktionen
+(@secref{entwurfsrezept}), Funktionen mit Summentypen (@secref{entwurfsrezept-summen}),
+Funktionen mit Produkttypen (@secref{entwurfsrezept-structs}) und Funktionen mit
+algebraischen Datentypen (@secref{entwurfsrezept-adt}) entwerfen.
+
+An dieser Stelle fassen wir zusammen, wie wir das Entwurfsrezept erweitern, um mit Daten beliebiger Größe umzugehen.
+
+@itemize[#:style 'ordered
+  @item{Wenn es in der Problemdomäne Informationen unbegrenzter Größe gibt, benötigen
+        Sie eine selbstreferenzierende Datendefinition. Damit eine selbstreferenzierende
+        Datendefinition gültig ist, muss sie drei Bedingungen erfüllen: 1) Der Datentyp
+        ist ein Summentyp. 2) Es muss mindestens
+        zwei Alternativen geben. 3) Mindestens eine der Alternativen referenziert nicht den
+        gerade definierten Datentyp, ist also nicht rekursiv.
+        
+        Sie sollten für rekursive Datentypen Datenbeispiele angeben, um zu validieren,
+        dass Ihre Definition sinnvoll ist. Wenn es nicht offensichtlich ist, wie Sie ihre
+        Datenbeispiele beliebig groß machen, stimmt vermutlich etwas nicht.}
+  @item{Beim zweiten Schritt ändert sich nichts: Sie benötigen wie immer eine Signatur, eine
+        Aufgabenbeschreibung und eine Dummy-Implementierung.}
+  @item{Bei selbstreferenzierenden Datentypen ist es nicht mehr möglich, für jede Alternative
+        einen Testfall anzugeben (weil es, wenn man in die Tiefe geht, unendlich viele Alternativen gibt).
+        Die Testfälle sollten auf jeden Fall alle Teile der Funktion abdecken. Versuchen Sie weiterhin,
+        kritische Grenzfälle zu identifizieren und zu testen.}
+  @item{Rekursive Datentypen sind algebraische Datentypen, daher kann für den 
+        Entwurf des Templates die Methodik aus @secref{entwurfsrezept-adt} angewendet
+        werden. Die wichtigste Ergänzung zu dem Entwurfsrezept betrifft den Fall, dass eine
+        Alternative implementiert werden muss, die selbstreferenzierend ist. Statt wie sonst
+        eine neue Hilfsfunktion im Template zu verwenden, wird in diesem Fall ein rekursiver
+        Aufruf der Funktion, die Sie gerade implementieren, ins Template aufgenommen. Als Argument
+        des rekursiven Aufrufs wird der Aufruf des Selektors, der den zur Datenrekursion gehörigen
+        Wert extrahiert, ins Template mit aufgenommen. Wenn Sie beispielsweise eine Funktion
+        @racket[(define (f a-list-of-strings ...) ...)] auf Listen definieren, so sollte im @racket[cons?] 
+        Fall der Funktion der Aufruf @racket[(f (rest a-list-of-strings) ...)] stehen.}
+  @item{Beim Entwurf des Funktionsbodies starten wir mit den Fällen der Funktion, die nicht rekursiv sind.
+        Diese Fälle nennt man auch die @italic{Basisfälle}, in Analogie zu Basisfällen bei Beweisen per Induktion.
+        Die nicht-rekursiven Fälle sind typischerweise einfach und sollten sich direkt aus den Testfällen ergeben.
+        
+        In den rekursiven Fällen müssen wir uns überlegen, was der rekursive Aufruf bedeutet. Hierzu nehmen wir an,
+        dass der rekursive Aufruf die Funktion korrekt berechnet, so wie wir es in der Aufgabenbeschreibung in Schritt 2
+        festgelegt haben. Mit diesem Wissen müssen wir nun nur noch die zur Verfügung stehenden Werte zur Lösung
+        zusammenbauen.}
+  @item{Testen Sie wie üblich, ob ihre Funktion wie gewünscht funktioniert und prüfen Sie, ob die Tests alle interessanten Fälle abdecken.}
+  @item{Für Programme mit rekursiven Datentypen gibt es einige neue Refactorings, die möglicherweise sinnvoll sind.
+        Überprüfen Sie, ob ihr Programm Datentypen enthält, die nicht rekursiv sind, aber die durch einen rekursiven
+        Datentyp vereinfacht werden könnten. Enthält ihr Programm beispielsweise separate Datentypen für Angestellter, Gruppenleiter, Abteilungsleiter, 
+        Bereichsleiter und so weiter, so könnte dies durch einen rekursiven Datentyp, mit dem beliebig tiefe Managementhierarchien 
+        modelliert werden können, vereinfacht werden. 
+                 }]
+
+@section{Refactoring von rekursiven Datentypen}
+Bezüglich der Datentyp-Refactorings aus @secref{refactoring-adt} ergeben sich neue
+        Typisomorphien durch "inlining" bzw. Expansion von rekursiven Datendefinitionen. Beispielsweise ist in folgendem Beispiel
+        @racket[list-of-number] isomorph zu @racket[list-of-number2], denn letztere Definition ergibt sich aus der ersten
+        indem man die Rekursion einmal expandiert.
+        
+@#reader scribble/comment-reader
+(racketblock
+; A list-of-number is either:
+; - empty
+; - (cons Number list-of-number)
+
+(define-struct Number-and-Number-List (num numlist))
+; A list-of-number2 is either:
+; - empty
+; - (make-Number-and-Number-List Number list-of-number)
+)        
+Versuchen Sie, Definitionen wie @racket[list-of-number2] zu vermeiden, denn Funktionen, die darauf definiert sind, sind komplexer als solche,
+die @racket[list-of-number] verwenden.
+
+Wenn wir die Notation aus @secref{refactoring-adt} verwenden, so können wir rekursive Datentypen als Funktionen modellieren, wobei der 
+Funktionsparameter das rekursive Vorkommen des Datentyps modelliert. Beispielsweise kann der Datentyp der Listen von Zahlen durch die
+Funktion @racket[F(X) = (+ Empty (* Number X))] modelliert werden@note{Solche Funktionen nennt man auch @italic{Funktoren} und sie sind
+in der universellen Algebra als @italic{F-Algebras} von wichtiger Bedeutung.}. Das schöne an dieser Notation ist, dass man sehr leicht
+definieren kann, wann rekursive Datentypen isormoph sind. Die Expansion eines rekursiven Datentyps ergibt sich daraus, den Funktionsparameter
+@racket[X] durch die rechte Seite der Definition zu ersetzen, also in dem Beispiel @racket[F(X) = (+ Empty (* Number (+ Empty (* Number X))))].
+Inlining ist die umgekehrte Operation. Die Rechtfertigung für diese Operationen ergibt sich daraus, dass man rekursive Datentypen
+als kleinsten Fixpunkt solcher Funktoren verstehen kann. Beispielsweise ist der kleinste Fixpunkt von 
+@racket[F(X) = (+ Empty (* Number X))] die unendliche Summe @racket[(+ Empty (* Number Empty) (* Number Number Empty) (* Number Number Number Empty) ...)].
+Der kleinste Fixpunkt ändert sich durch Expansion oder Inlining nicht, daher sind solche Datentypen isomorph.
+
+@section{Programmäquivalenz und Induktionsbeweise}
+Betrachten Sie die folgenden beiden Funktionen:
+
+@#reader scribble/comment-reader
+(racketblock
+; FamilyTree -> Number
+; computes the number of known ancestors of p
+(check-expect (numKnownAncestors HEINZ) 5)
+(define (numKnownAncestors p)
+  (cond [(person? p) (+ 1
+                        (numKnownAncestors (person-father p))
+                        (numKnownAncestors (person-mother p)))]
+        [else 0]))
+
+; FamilyTree -> Number
+; computes the number of unknown ancestors of p
+(check-expect (numUnknownAncestors HEINZ) 6)
+(define (numUnknownAncestors p)
+  (cond [(person? p) (+ (numUnknownAncestors (person-father p))
+                        (numUnknownAncestors (person-mother p)))]
+        [else 1]))
+)
+
+Die Tests suggerieren, dass für alle Personen @racket[p] folgende Äquivalenz gilt: @racket[(+ (numKnownAncestors p) 1)] @equiv @racket[(numUnknownAncestors p)].
+Aber wie können wir zeigen, dass diese Eigenschaft tatsächlich stimmt?
+
+Das Schliessen durch Gleichungen, wie wir es in @secref{equationalreasoning} kennengelernt haben, reicht hierzu alleine nicht aus.
+Dadurch, dass die Funktionen rekursiv sind, können wir durch @italic{EFUN} immer größere Terme erzeugen, aber wir kommen niemals
+von @racket[numKnownAncestors] zu @racket[numUnknownAncestors].
+
+Bei strukturell rekursiven Funktionen auf rekursiven Datentypen können wir jedoch ein weiteres, sehr mächtiges Beweisprinzip verwenden, nämlich das
+Prinzip der @italic{Induktion}. Betrachten Sie nochmal die Mengenkonstruktion der ft@subscript{i} aus @secref{rekursivedatentypen}. Wir wissen,
+dass der Typ FamilyTree die Vereinigung aller ft@subscript{i} ist. Desweiteren wissen wir, dass, wenn @racket[p] in ft@subscript{i+1} ist, dann ist
+@racket[(person-father p)] und @racket[(person-mother p)] in ft@subscript{i}. Dies rechtfertigt die Verwendung des Beweisprinzips der Induktion:
+Wir zeigen die gewünschte Äquivalenz für den Basisfall i = 1, also @racket[p] = @racket[false]. Dann zeigen wir die Äquivalenz für den Fall i = n+1, 
+unter der Annahme, dass die Äquivalenz bereits für i = n gilt. Anders ausgedrückt zeigen wir für die Äquivalenz für den Fall 
+@racket[p] = @racket[(make-person n p1 p2)] unter der Annahme, dass die Äquivalenz für @racket[p1] und @racket[p2] gilt.
+
+Typischerweise läßt man bei dieser Art von Induktionsbeweisen die Mengenkonstruktion mit ihren Indizes weg und "übersetzt" die Indizes direkt in die
+Datentyp-Notation. Dies bedeutet, dass man die gewünschte Aussage zunächst für die nicht-rekursiven Fälle des Datentyps zeigt, und dann im Induktionsschritt
+die Aussage für die rekursiven Fälle zeigt unter der Annahme, dass die Aussage für die Unterkomponenten des Datentyps bereits gilt. Diese Art
+des Induktionsbeweises nennt man auch @italic{strukturelle Induktion}.
+
+Wir wollen beweisen: @racket[(+ (numKnownAncestors p) 1)] @equiv @racket[(numUnknownAncestors p)] für alle Personen @racket[p].
+Betrachten wir zunächst den Basisfall @racket[p] = @racket[false].
+
+Dann können wir schliessen:
+
+@racket[(+ (numKnownAncestors false) 1)]
+
+@equiv (gemäß @italic{EFUN} und @italic{EKONG})
+
+@racket[(+ (cond [ (person? false) ...] [else 0]) 1)]
+
+@equiv (gemäß @italic{STRUCT-predfalse} und @italic{EKONG})
+
+@racket[(+ (cond [false ...] [else 0]) 1)]
+
+@equiv (gemäß @italic{COND-False} und @italic{EKONG})
+
+@racket[(+ (cond [else 0]) 1)]
+
+@equiv (gemäß @italic{COND-True} und @italic{EKONG})
+
+@racket[(+ 0 1)]
+
+@equiv (gemäß @italic{PRIM})
+
+
+@racket[1]
+
+Unter Nutzung von @italic{ETRANS} können wir damit @racket[(+ (numKnownAncestors false) 1)] @equiv @racket[1] schliessen.
+Auf die gleiche Weise können wir schliessen: @racket[(numUnknownAncestors false)] @equiv @racket[1]. Damit haben wir den Basisfall gezeigt.
+
+Für den Induktionsschritt müssen wir die Äquivalenz für @racket[p] = @racket[(make-person n p1 p2)] zeigen und dürfen hierbei verwenden,
+dass die Aussage für @racket[p1] und @racket[p2] gilt, also @racket[(+ (numKnownAncestors p1) 1)] @equiv @racket[(numUnknownAncestors p1)]
+und @racket[(+ (numKnownAncestors p2) 1)] @equiv @racket[(numUnknownAncestors p2)].
+
+Wir können nun wie folgt schliessen:
+
+@racket[(+ (numKnownAncestors (make-person n p1 p2)) 1)]
+
+@equiv (gemäß @italic{EFUN} und @italic{EKONG})
+
+@racketblock[(+ (cond [(person? (make-person n p1 p2)) 
+                       (+ 1
+                         (numKnownAncestors (person-father (make-person n p1 p2)))
+                         (numKnownAncestors (person-mother (make-person n p1 p2))))]
+                      [else 0]) 
+                1)]
+
+
+@equiv (gemäß @italic{STRUCT-predtrue} und @italic{EKONG})
+
+@racketblock[(+ (cond [true 
+                       (+ 1
+                          (numKnownAncestors (person-father (make-person n p1 p2)))
+                          (numKnownAncestors (person-mother (make-person n p1 p2))))]
+                      [else 0]) 
+                1)]
+
+
+@equiv (gemäß @italic{COND-True} und @italic{EKONG})
+
+@racketblock[(+ (+ 1
+                  (numKnownAncestors (person-father (make-person n p1 p2)))
+                  (numKnownAncestors (person-mother (make-person n p1 p2))))
+                1)]
+
+
+@equiv (gemäß @italic{STRUCT-select} und @italic{EKONG})
+
+@racketblock[(+ (+ 1
+                  (numKnownAncestors p1)
+                  (numKnownAncestors p2))
+                1)]
+
+
+@equiv (gemäß @italic{EPRIM})
+
+
+@racketblock[(+
+              (+ (numKnownAncestors p1) 1)
+              (+ (numKnownAncestors p2) 1))]
+
+@equiv (gemäß Induktionsannahme und @italic{EKONG})
+
+@racketblock[(+
+              (numUnknownAncestors p1)
+              (numUnknownAncestors p2))]
+
+
+@equiv (gemäß @italic{STRUCT-select} und @italic{EKOMM} und @italic{EKONG})
+
+@racketblock[(+
+              (numUnknownAncestors (person-father (make-person n p1 p2)))
+              (numUnknownAncestors (person-mother (make-person n p1 p2))))]
+
+@equiv (gemäß @italic{EFUN} und @italic{EKOMM})
+
+@racket[(numUnknownAncestors (make-person n p1 p2))]
+
+Damit haben wir (unter Nutzung von @italic{ETRANS}) die Äquivalenz bewiesen. Dieser Beweis ist sehr ausführlich und kleinschrittig.
+Wenn Sie geübter im Nutzen von Programmäquivalenzen sind, werden ihre Beweise großschrittiger und damit
+auch kompakter.
+
+Die gleiche Beweismethodik läßt sich für alle rekursiven Datentypen anwenden. Insbesondere läßt sie sich auch für Listen anwenden.

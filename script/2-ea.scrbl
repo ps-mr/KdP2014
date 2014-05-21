@@ -229,7 +229,7 @@ Einige Beispiele für die Benutzung des Notenschemas:
 (note 73)
 (note 24)]
 
-@section[#:tag "kondsem"]{Bedeutung konditionaler Ausdrücke}    
+@subsection[#:tag "kondsem"]{Bedeutung konditionaler Ausdrücke}    
 Im allgemeinen Fall sieht ein konditionaler Ausdruck wie folgt aus:
 
 @racketblock[

@@ -177,7 +177,7 @@ von Code fördern. Hier die Implementation der Hilfsfunktionen.
 (define (overlaps-rectangle-circle r c) ...)
 )
 
-@section{Programmentwurf mit ADTs}
+@section[#:tag "entwurfsrezept-adt"]{Programmentwurf mit ADTs}
 Das Entwurfsrezept aus Abschnitt @secref{entwurfsrezept} ergänzen wir wie folgt:
 
 @itemize[#:style 'ordered

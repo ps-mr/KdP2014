@@ -615,21 +615,21 @@ und welche Ergebnisse sie produzieren.
 @section{Refactoring und Schliessen durch Gleichungen}
 
 
-@subsection{Refactoring von Ausdrücken}
+@subsection[#:tag "equationalreasoning"]{Refactoring von Ausdrücken}
 
 Wir hatten in Abschnitt @secref{semanticsofexpressions} vorgestellt, wie man auf Basis der Reduktionsregeln
-eine Gleichheitsrelation auf Ausdrücken definieren kann. 
-Diese Gleichheiten können zum Refactoring von Programmen verwendet
+eine Äquivalenzrelation auf Ausdrücken definieren kann. 
+Diese Äquivalenzen können zum Refactoring von Programmen verwendet
 werden - also Programmänderungen, die nicht die Bedeutung verändern aber die Struktur des Programms verbessern.
 Außerdem können sie verwendet werden, um Eigenschaften seines Programmes herzuleiten, zum Beispiel
 dass die Funktion @racket[overlaps-circle] aus dem vorherigen Kapitel kommutativ ist, also 
 @racket[(overlaps-circle c1 c2)] @equiv @racket[(overlaps-circle c2 c1)].
 
-Die Gleichheitsrelation aus Abschnitt @secref{semanticsofexpressions} war allerdings zu klein für viele
+Die Äquivalenzrelation aus Abschnitt @secref{semanticsofexpressions} war allerdings zu klein für viele
 praktische Zwecke, denn sie erfordert beispielsweise, dass wir Funktionsaufrufe nur dann auflösen können,
 wenn alle Argumente Werte sind.
 
-BSL hat jedoch eine bemerkenswerte Eigenschaft, die es uns erlaubt, eine viel mächtigere Gleichheitsrelation
+BSL hat jedoch eine bemerkenswerte Eigenschaft, die es uns erlaubt, eine viel mächtigere Äquivalenzrelation
 zu definieren: Es ist für das Ergebnis eines Programms nicht von Bedeutung, in welcher Reihenfolge Ausdrücke ausgewertet
 werden. Insbesondere ist es nicht notwendig, vor einem Funktionsaufruf die Argumente auszuwerten; man kann auch
 einfach die Argumentausdrücke verwenden.
@@ -643,13 +643,20 @@ Die Idee wird durch folgenden, allgemeineren Auswertungskontext ausgedrückt:
       @BNF-seq[open @litchar{cond} @kleenestar[@BNF-group[@BNF-seq[lb @nonterm{e} @nonterm{e} rb]]] lb @nonterm{e} @nonterm{E} rb @kleenestar[@BNF-group[@BNF-seq[lb @nonterm{e} @nonterm{e} rb]]]  close]      
       @BNF-seq[open @litchar{and} @kleenestar[@nonterm{e}] @nonterm{E} @kleenestar[@nonterm{e}] ]
 )]
-Zusammen mit der folgenden Kongruenzregel für unsere Gleichheitsrelation, drückt dieser Auswertungskontext aus, 
+Zusammen mit der folgenden Kongruenzregel für unsere Äquivalenzrelation, drückt dieser Auswertungskontext aus, 
 dass überall "gleiches mit gleichem" ersetzt werden darf:
+
 @elem[#:style inbox-style]{
 @italic{(EKONG): }Falls @mv{e-1} @equiv @mv{e-2}, dann @mv{E[e-1]} @equiv @mv{E[e-2]}.
 }      
  
-Eine Gleichheitsrelation sollte natürlich eine Äquivalenzrelation --- also reflexiv, kommutativ und transitiv --- sein:
+Eine Äquivalenzsrelation sollte möglichst groß sein, damit wir so viele Äquivalenzen wie möglich zeigen können.
+Gleichzeitig sollte sie korrekt sein. Dies bedeutet, dass äquivalente Programme das gleiche Verhalten haben, also
+insbesondere -- sofern sie terminieren -- bei Auswertung den gleichen Wert ergeben.
+
+Wir definieren nun nach und nach die Regeln, die für die Äquivalenzrelation gelten sollen. 
+Zunächst einmal sollte es tatsächlich eine Äquivalenzrelation --- also reflexiv, kommutativ und transitiv --- sein:
+
 @elem[#:style inbox-style]{
 @italic{(EREFL): }@mv{e} @equiv @mv{e}.
 }      
@@ -662,22 +669,30 @@ Eine Gleichheitsrelation sollte natürlich eine Äquivalenzrelation --- also ref
 @italic{(ETRANS): }Falls @mv{e-1} @equiv @mv{e-2} und @mv{e-2} @equiv @mv{e-3}, dann @mv{e-1} @equiv @mv{e-3}.
 }      
 
+Die Verknüpfung zur Auswertungsrelation wird durch diese Regel geschaffen: Reduktion erhält Äquivalenz.
+
 @elem[#:style inbox-style]{
 @italic{(ERED): }Falls @mv{e-1} @step @mv{e-2} dann @mv{e-1} @equiv @mv{e-2}.
 }
 
+Damit wir auch "symbolisch" Funktionen auswerten können, erweitern wir die Regel für Funktionsaufrufe, so dass es
+für die Bestimmung von Äquivalenzen nicht notwendig ist, die Argumente auszuwerten.
 
 @elem[#:style inbox-style]{
 @italic{(EFUN): }Falls @BNF-seq[open @litchar{define} open @mv{name} @mv{name-1} "..." @mv{name-n} close @mv{e} close] in der Umgebung, @linebreak[]
 dann @BNF-seq[open @mv{name} @mv{e-1} "..." @mv{e-n} close] @equiv @mv{e}[@mv{name-1} := @mv{e-1} ... @mv{name-n} := @mv{e-n}]}
 
+Bei der Konjunktion wissen wir, dass der Gesamtausdruck zu @racket[false] auswertet (oder nicht terminiert), wenn mindestens
+eines der Argumente äquivalent zu @racket[false] ist.
 
-@elem[#:style inbox-style]{
-@italic{(EAND-1): }@BNF-seq[open @litchar{and} @litchar{true}  @litchar{true} close] @equiv @litchar{true}}
+@italic{(EAND): }@elem[#:style inbox-style]{@BNF-seq[open @litchar{and} "..." @litchar{false} "..." close] @equiv @litchar{false}}
 
-@italic{(EAND-3): }@elem[#:style inbox-style]{@BNF-seq[open @litchar{and} "..." @litchar{false} "..." close] @equiv @litchar{false}}
+Außerdem können wir Wissen, das wir über die eingebauten Funktionen haben, beim Schliessen mit Äquivalenzen nutzen. Beispielsweise wissen
+wir, dass @racket[(+ a b)] @equiv @racket[(+ b a)]. Wir fassen die Menge der Äquivalenzen, die für die eingebauten Funktionen gelten unter dem
+Namen @italic{(EPRIM)} zusammen.
 
-Einen kleinen Hakenfuss gibt es allerdings doch noch. Man würde sich von einer Gleichheitsrelation für Programme wünschen, dass folgende Eigenschaft
+
+Einen kleinen Hakenfuss gibt es allerdings doch noch. Man würde sich von einer Äquivalenzrelation für Programme wünschen, dass folgende Eigenschaft
 gilt: Falls @mv{e-1} @equiv @mv{e-2} und @mv{e-1} @multistep @mv{v}, dann auch @mv{e-2} @multistep @mv{v}. Diese Eigenschaft gilt jedoch
 nicht, weil es sein kann, dass @mv{e-1} terminiert aber @mv{e-2} nicht. 
 
@@ -691,8 +706,8 @@ Beispiel: Betrachten Sie folgendes Programm:
 
 Da @racket[(f 1)] @step @racket[(f 1)], terminiert die Berechnung des Arguments für @racket[g] nicht, und gemäß der Kongruenzregel
 gilt damit @racket[(g (f 1))] @step @racket[(g (f 1))], daher terminiert die Berechnung des Ausdrucks @racket[(g (f 1))] @step @racket[(g (f 1))] nicht.
-Auf der anderen Seite gilt jedoch gemäß @italic{(EFUN)} @racket[(g (f 1))] @equiv 42. Man muss daher bei der Verwendung der Gleichheitsregeln
-berücksichtigen, dass die Gleichheit nur unter der Voraussetzung gilt, dass die Terme auf beiden Seiten terminieren..
+Auf der anderen Seite gilt jedoch gemäß @italic{(EFUN)} @racket[(g (f 1))] @equiv 42. Man muss daher bei der Verwendung der Äquivalenzregeln
+berücksichtigen, dass die Äquivalenz nur unter der Voraussetzung gilt, dass die Terme auf beiden Seiten terminieren..
 
 Es gilt jedoch folgende etwas schwächere Eigenschaft, die wir ohne Beweis aufführen:
 
@@ -700,7 +715,7 @@ Falls @mv{e-1} @equiv @mv{e-2} und @mv{e-1} @multistep @mv{v-1} und @mv{e-2} @mu
 
 Wenn also @mv{e-1} und @mv{e-2} gleich sind und beide terminieren, dann ist der Wert, der herauskommt, gleich.
 
-@subsection{Refactoring von algebraischen Datentypen}
+@subsection[#:tag "refactoring-adt"]{Refactoring von algebraischen Datentypen}
 Algebraische Datentypen sind Kombinationen von Produkttypen und Summentypen. Zwei (algebraische) Datentypen können @italic{isomorph} sein.
 Dies bedeutet, dass es eine bijektive Abbildung zwischen den Datentypen gibt und Programme, die den einen Datentyp verwenden, so umgebaut werden können, dass sie stattdessen den anderen verwenden.
 
@@ -708,11 +723,11 @@ Beispiel: Betrachten Sie die folgenden drei Definitionen für einen Datentyp @it
 @#reader scribble/comment-reader
 (racketblock
 (define-struct student1 (lastname firstname matnr))
-; a Student1 is: (make-student String String Number)
+; a Student1 is: (make-student1 String String Number)
 ; interp. lastname, firstname, and matrikel number of a student
 
 (define-struct student2 (matnr lastname firstname))
-; a Student2 is: (make-student Number String String)
+; a Student2 is: (make-student2 Number String String)
 ; interp. matrikel number, lastname, and firstname of a student
 
 (define-struct fullname (firstname lastname))
@@ -720,7 +735,7 @@ Beispiel: Betrachten Sie die folgenden drei Definitionen für einen Datentyp @it
 ; interp. first name and last name of a person
 
 (define-struct student3 (fullname matnr))
-; a Student3 is: (make-student FullName Number)
+; a Student3 is: (make-student3 FullName Number)
 ; interp. full name and matrikel number of a student                                                                                           
 )
 

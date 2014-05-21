@@ -151,6 +151,94 @@ einem zusätzlichen Fall: Wenn @racket[quasiquote] auf ein @racket[unquote] trif
 sich beide. Ein Ausdruck wie @racket[`( ,e)] wird also transformiert zu @racket[e].
 
 @section{S-Expressions}
+Betrachten Sie die @racket[person-has-ancestor] Funktion aus @secref{programmieren-rekdt}. Eine ähnliche Funktion
+läßt sich auch für viele andere baumartig organisierte Datentypen definieren, beispielsweise solche zur Repräsentation von
+Ordnerhierarchien in Dateisystemen oder zur Repräsentation der Hierarchie innerhalb einer Firma. 
+
+Natürlich könnten wir neben @racket[person-has-ancestor] nun auch noch @racket[file-has-enclosing-directory] 
+und @racket[employee-has-manager] implementieren, aber diese hätten eine sehr ähnliche Struktur wie @racket[person-has-ancestor].
+Wir würden also gegen das DRY-Prinzip verstossen.
+
+Es gibt eine ganze Reihe von Funktionen, die sich auf vielen baumartigen Datentypen definieren liessen: Die Tiefe eines Baumes berechnen, 
+nach Vorkommen eines Strings suchen, alle "Knoten" des Baums finden, die ein Prädikat erfüllen, und so weiter.
+
+Um solche Funktionen generisch (also einmal für alle Datentypen) definieren zu können, brauchen wir die Möglichkeit,
+über die genaue Struktur von Datentypen abstrahieren zu können. Dies funktioniert mit den "getypten" Datentypen, die 
+wir bisher betrachtet haben, nicht.
+
+Eine der großen Innovationen der Programmiersprache LISP war die Idee eines universellen Datenformats: Ein Format, mit
+dem beliebige strukturierte Daten repräsentiert werden können, und zwar in solch einer Weise, dass das Datenformat
+Teil der Daten ist und dementsprechend darüber abstrahiert werden können. Diese Idee wird typischerweise alle paar Jahre
+wieder einmal neu erfunden; zur Zeit sind beispielsweise XML und JSON beliebte universelle Datenformate.
+
+Der Mechanismus, den es dazu in LISP seit Ende der 1950er Jahre gibt, heißt @italic{S-Expressions}. Was sind S-Expressions?
+Hier ist eine Datendefinition, die dies genau beschreibt:
+
+@#reader scribble/comment-reader
+(racketblock
+; An S-Expression is one of:
+; – a Number
+; - a String
+; - a Symbol
+; - a Boolean
+; - an Image
+; – empty
+; - a (list-of S-Expression)
+)
+
+Beispiele für S-Expressions sind: @racket[(list 1 (list 'two 'three) "four")], @racket["Hi"].
+Dies sind keine S-Expressions: @racket[(make-posn 1 2)], @racket[(list (make-student "a" "b" 1))].
+
+S-Expressions können als universelles Datenformat verwendet werden, indem die Strukturierung der Daten zum Teil
+der Daten gemacht wird. Statt @racket[(make-posn 1 2)] kann man auch die S-Expression @racket['(posn 1 2)] 
+oder @racket['(posn (x 1) (y 2))]
+verwenden; statt @racket[(make-person "Heinz" (make-person "Horst" false false) (make-person "Hilde" false false))]
+kann man auch die S-Expression @racket['(person "Heinz" (person "Horst" #f #f) (person "Hilde" #f #f))] 
+oder @racket['(person "Heinz" (father (person "Horst" (father #f) (mother #f)) (mother (person "Hilde" (father #f) (mother #f)))))]
+verwenden.
+
+Der Vorteil der zweiten Variante ist, dass ich beliebige strukturierte Daten auf diese Weise uniform ausdrücken kann
+und die Struktur selber Teil der Daten ist. Damit wird es möglich, sehr generische Funktionen zu definieren, die auf
+beliebigen strukturierten Daten funktionieren. Der Nachteil ist der, dass man Sicherheit und Typisierung verliert.
+Es ist schwierig, zu sagen, dass eine Funktion beispielsweise nur S-Expressions als Eingabe verarbeiten kann, die
+einen Stammbaum repräsentieren. 
+
+Der Quote-Operator hat die Eigenschaft, dass er stets S-Expressions erzeugt. Sie können sogar beliebige Definitionen oder Ausdrücke 
+in BSL nehmen, einen Quote-Operator drumherumschreiben, und Sie erhalten eine S-Expression, die dieses Programm repräsentiert.
+
+@ex[(first '(define-struct student (firstname lastname matnr)))]
+
+Diese Eigenschaft, die manchmal @italic{Homoikonizität} genannt, macht es besonders leicht, Programme als Daten zu 
+repräsentieren und Programme zu schreiben, die die Repräsentation eines Programms als Eingabe bekommen oder als Ausgabe produzieren.
+In Scheme und (vollem) Racket gibt es sogar eine Funktion @racket[eval], die eine Repräsentation eines Ausdrucks als S-Expression
+als Eingabe bekommt und die diesen Ausdruck dann interpretiert und das Ergebnis zurückliefert. Beispielswäre würde @racket[(eval '(+ 1 1))] 
+Ergebnis @racket[2] liefern. Damit wird es möglich, Programme zur Laufzeit zu berechnen und dann direkt auszuführen - eine sehr mächtige aber
+auch sehr gefährliche Möglichkeit.
 
 @section{Anwendungsbeispiel: Dynamische Webseiten}
+Da S-Expressions ein universelles Datenformat sind, ist es einfach, andere Datenformate darin zu kodieren, zum Beispiel HTML (die Sprache in 
+der die meisten Webseiten definiert werden).
 
+Zusammen mit Quasiquote und Antiquote können S-Expressions dadurch leicht zur Erstellung von dynamischen Webseiten, bei denen die
+festen Teile als Template definiert werden, genutzt werden. Beispielsweise könnte eine einfache Funktion zur Erzeugung
+einer dynamischen Webseite wie folgt aussehen:
+
+@#reader scribble/comment-reader
+(racketblock
+; String String -> S-Expression
+; produce a (representation of) a web page with given author and title
+(define (my-first-web-page author title)
+  `(html
+     (head
+       (title ,title)
+       (meta ((http-equiv "content-type")
+              (content "text-html"))))
+     (body
+       (h1 ,title)
+       (p "I, " ,author ", made this page."))))
+)
+
+Die Funktion erzeugt die Repräsentation einer HTML-Seite, bei der die übergebenen Parameter an der gewünschten Stelle eingebaut werden.
+S-Expressions und Quasi/Antiquote führen zu einer besseren Lesbarkeit im Vergleich zur Variante der Funktion, die die Datenstruktur mit @racket[cons]
+und @racket[empty] oder @racket[list] zusammenbaut. Die erzeugte S-Expression ist zwar noch kein HTML, aber sie kann leicht zu HTML
+umgewandelt werden. In Racket gibt es zu diesem Zweck beispielsweise die @racket[xexpr->xml] Funktion der @hyperlink["http://docs.racket-lang.org/xml/index.html"]{XML Bibliothek}.

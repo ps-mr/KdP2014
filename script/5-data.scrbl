@@ -268,6 +268,7 @@ wie sich der Entwurf von Funktionen mit Summentypen vom allgemeinen Entwurfsreze
 @italic{The tax on an item is either an absolute tax of 5 or 10 currency units, or a linear tax. Design a function that computes the price
 of an item after applying its tax.}
 
+@subsection[#:tag "entwurfsrezept-summen"]{Entwurf mit Summentypen}
 Das Entwurfsrezept für den Entwurf von Funktionen ergänzen wir wie folgt:
 @itemize[#:style 'ordered
        @item{Falls die Problemstellung Werte in unterschiedliche Klassen unterteilt, 

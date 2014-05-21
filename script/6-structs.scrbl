@@ -399,7 +399,7 @@ Probieren Sie aus, was passiert, wenn der Ball genau in eine Ecke des Spielfelde
 Wie kann man dieses Problem lösen? Reflektieren Sie in Anbetracht dieses Problems darüber,
 wieso es wichtig ist, immer die Extremfälle (im Englischen: @italic{@bold{Corner} Cases}) zu testen ;-)
 
-@section{Erweiterung des Entwurfsrezepts}
+@section[#:tag "entwurfsrezept-structs"]{Erweiterung des Entwurfsrezepts}
 
 Die vorhergehenden Beispiele haben gezeigt, dass viele Probleme es erfordern, parallel
 mit Funktionen passende Datenstrukturen zu entwickeln. Dies bedeutet, dass sich

@@ -436,8 +436,8 @@ Diese Eigenschaft nennt man @italic{Konfluenz}. Reduktionen die auseinanderlaufe
 der Wert den man am Ende erhält ist auf jeden Fall eindeutig.
 
 
-Auf Basis dieser Reduktionsregeln können wir nun  definieren, unter welchen Umständen zwei Programme die gleiche Bedeutung haben:
-Zwei Ausdrücke @e1 und @e2 haben die gleiche Bedeutung, geschrieben @e1 @equiv @e2 , falls es einen Ausdruck @e gibt
+Auf Basis dieser Reduktionsregeln können wir nun  definieren, unter welchen Umständen zwei Programme äquivalent sind:
+Zwei Ausdrücke @e1 und @e2 sind äquivalent, geschrieben @e1 @equiv @e2 , falls es einen Ausdruck @e gibt
 so dass @e1 @multistep @e und @e2 @multistep @e . 
 
 Beispiele:
@@ -452,11 +452,11 @@ Beispiele:
 
 ]
 
-Die Rechtfertigung für diese Definition liegt in folgender wichtiger Eigenschaft begründet: Wir können innerhalb eines großen Programms Teilausdrücke beliebig durch Teilausdrücke mit der gleichen Bedeutung ersetzen, ohne die Bedeutung des Gesamtprogramms zu verändern. Etwas formaler können wir das so ausdrücken: 
+Die Rechtfertigung für diese Definition liegt in folgender wichtiger Eigenschaft begründet: Wir können innerhalb eines großen Programms Teilausdrücke beliebig durch äquivalente Teilausdrücke ersetzen, ohne die Bedeutung des Gesamtprogramms zu verändern. Etwas formaler können wir das so ausdrücken: 
 
 Sei @e1 ein Unterausdruck eines größeren Ausdrucks @e2 und @e1 @equiv @e3 . Ferner sei @(prime @e2) eine Kopie von @e2 in dem Vorkommen von @e1 durch @e3 ersetzt wurden. Dann gilt: @e2 @equiv @(prime @e2). 
 
-Diese Eigenschaft folgt direkt aus der Kongruenzregel und der Definition von @equiv . Dieser Gleichheitsbegriff ist identisch mit dem, den Sie aus der Schulmathematik kennen, wenn Sie Gleichungen umformen, zum Beispiel wenn wir a + a - b umformen zu 2a - b weil wir wissen dass a + a = 2a. 
+Diese Eigenschaft folgt direkt aus der Kongruenzregel und der Definition von @equiv . Dieser Äquivalenzbegriff ist identisch mit dem, den Sie aus der Schulmathematik kennen, wenn Sie Gleichungen umformen, zum Beispiel wenn wir a + a - b umformen zu 2a - b weil wir wissen dass a + a = 2a. 
 
 Die Benutzung von @equiv um zu zeigen dass Programme die gleiche Bedeutung haben nennt man auch @italic{equational reasoning}.
 
