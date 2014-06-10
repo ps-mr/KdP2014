@@ -12,11 +12,11 @@
 @(require scriblib/footnote)
    
 @(define inbox-style
-    (make-style "InBox"
+    (make-style "inbox"
                 (list (make-css-addition "inbox.css")
                       (make-tex-addition "inbox.tex"))))
 
-@title[#:version ""]{Bedeutung von BSL}
+@title[#:version "" #:tag "bsl-semantics"]{Bedeutung von BSL}
 
 
 In diesem Kapitel werden wir die Bedeutung (fast) aller Sprachkonstrukte von BSL zusammenfassen und formal definieren.

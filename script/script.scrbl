@@ -18,3 +18,4 @@ mit Beiträgen von Yufei Cai, Yi Dai und Tillmann Rendel
 @include-section["9-recdatastructures.scrbl"]
 @include-section["10-sepxs.scrbl"]
 @include-section["11-abstraction.scrbl"]
+@include-section["12-semanticsisl.scrbl"]

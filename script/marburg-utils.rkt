@@ -10,10 +10,12 @@
 (require scribble/manual)
 (require teachpack/2htdp/scribblings/img-eval)
 
-(provide block ev ex stdeval bsl-eval todo step multistep equiv prime e e0 e1 e2 e3 e4 eN-1 eN v v1 v2 v3 vN-1 vN x x1 x2 x3 xI xN-1 xN xN eI vI eI-1 eI+1)
+(provide block ev ex vdash stdeval bsl-eval todo step multistep equiv prime e e0 e1 e2 e3 e4 eN-1 eN v v1 v2 v3 vN-1 vN x x1 x2 x3 xI xN-1 xN xN eI vI eI-1 eI+1)
 
 
 (define step (elem "→")) ; (bitmap "arrow.png"))
+(define vdash (elem "⊢")) ; (bitmap "arrow.png"))
+
 (define multistep (elem step (superscript "*")))
 (define equiv (elem "≡"))
 
