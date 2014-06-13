@@ -1,7 +1,7 @@
 #lang scribble/manual
 @(require scribble/eval)
 @(require "marburg-utils.rkt")
-@(require (for-label lang/htdp-intermediate))
+@(require (for-label lang/htdp-intermediate-lambda))
 @(require (for-label (except-in 2htdp/image image?)))
 @(require (for-label 2htdp/universe))
 @(require scribble/bnf)
@@ -728,7 +728,7 @@ der Performance verwenden.
 @subsection{Lokale Strukturen}
 Es ist möglich, auch Strukturen mit @racket[define-struct] lokal zu definieren. Wir werden diese Möglichkeit bis auf weiteres nicht verwenden.
 
-@subsection{Scope lokaler Definitionen}
+@subsection[#:tag "scope-local"]{Scope lokaler Definitionen}
 Der @italic{Scope} einer Definition eines Namens ist der Bereich im Programm, in dem sich eine Verwendung des Namens auf diese Definition bezieht.
 Unserer Programmiersprache verwendet @italic{lexikalisches Scoping}, auch bekannt als @italic{statisches Scoping}. Dies bedeutet, dass der Scope einer lokalen Definition die Unterausdrücke 
 des @racket[local] Ausdrucks sind.

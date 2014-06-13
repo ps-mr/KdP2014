@@ -2,7 +2,7 @@
 @(require scribble/eval)
 @(require scribble/core)
 @(require "marburg-utils.rkt")
-@(require (for-label lang/htdp-beginner))
+@(require (for-label lang/htdp-intermediate-lambda))
 @(require (for-label (except-in 2htdp/image image?)))
 @(require (for-label 2htdp/universe))
 @(require scribble/bnf)
@@ -199,4 +199,52 @@ Die Definition von Konstanten ist gegenüber BSL unverändert.
 die letzte Definition von @mv{name} in @mv{env} ist.}
 
 @section[#:tag "isl-scoping"]{Scope}
+Wir wollen unter der Berücksichtigung der lokalen Definitionen nochmal die Diskussion über Scope aus @secref{scope-local} aufgreifen und 
+diskutieren, wie die formale Definition lexikalisches Scoping garantiert. Lexikalisches Scoping ist in zwei der Regeln oben sichtbar:
+@italic{(APP)} und @italic{(LOCAL)}.
 
+In @italic{(LOCAL)} findet eine Umbenennung statt: Der Name von lokalen Konstanten wird umbenannt und alle Verwendungen des Namens 
+in den Unterausdrücken des @racket[local] Ausdrucks werden ebenfalls umbenannt. Dadurch, dass diese Umbenennung genau in den Unterausdrücken
+vollzogen wird, wird lexikalisches Scoping sichergestellt. Dadurch, dass ein "frischer" Name verwendet wird, kann keine Benutzung des Namens
+ausserhalb dieser Unterausdrücke an die umbenannte Definition gebunden werden.
+
+Das gleiche Verhalten findet sich in @italic{(APP)}: Dadurch, dass die formalen Parameter nur im Body der Funktion durch die aktuellen 
+Argumente ersetzt werden, wird lexikalisches Scoping sichergestellt. Gleichzeitig wird hierdurch definiert, wie Closures repräsentiert werden,
+nämlich als Funktionsdefinitionen, in denen die "weiter aussen" gebundenen Namen bereits durch Werte ersetzt wurden.
+
+Beispiel: Der Ausdruck @racket[(f 3)] in diesem Programm 
+
+@racketblock[
+(define (f x)
+  (lambda (y) (+ x y)))
+(f 3)]
+
+wird reduziert zu @racket[(lambda (y) (+ 3 y))]; der Wert für @racket[x] wird also im Closure mit gespeichert.
+
+Ein wichtiger Aspekt von lexikalischem Scoping ist @italic{Shadowing}. Shadowing ist eine Strategie, mit der Situation umzugehen, dass gleichzeitig
+mehrere Definitionen eines Namens im Scope sind.
+
+Beispiel:
+@racketblock[
+(define x 1)
+(define (f x)
+  (+ x (local [(define x 2)] (+ x 1))))]
+
+In diesem Beispiel gibt es drei @italic{bindende} Vorkommen von @racket[x] und zwei @italic{gebundene} Vorkommen von @racket[x].
+Das linke Vorkommen von @racket[x] in der letzten Zeile des Beispiels ist im lexikalischen Scope von zwei der drei Definitionen;
+das rechte Vorkommen von @racket[x] ist sogar im lexikalischen Scope aller drei Definitionen.
+
+Shadowing besagt, dass in solchen Situationen stets die lexikalisch "nächste" Definition "gewinnt". Mit "nächste" ist die Definition gemeint,
+die man als erstes antrifft, wenn man in der grammatikalischen Struktur des Programmtextes von dem Namen nach außen geht.
+Die weiter innen stehenden Definitionen überdecken also die weiter außen stehenden Definitionen: Sie werfen einen Schatten ("shadow"), in dem
+die aussen stehende Definition nicht sichtbar ist. Daher wird in dem Beispiel oben beispielsweise
+der Ausdruck @racket[(f 3)] zu @racket[6] ausgewertet.
+
+Shadowing rechtfertigt sich aus einer Modularitätsüberlegung: Die Bedeutung eines Ausdrucks sollte möglichst lokal ablesbar sein. Insbesondere
+sollte ein Ausdruck, der keine ungebundenen Namen enthält (ein sogenannter "geschlossener" Term), überall die gleiche Bedeutung haben, egal wo man
+ihn einsetzt. Beispielsweise sollte der Ausdruck @racket[(lambda (x) x)] immer die Identitätsfunktion sein und nicht beispielsweise die konstante @racket[3] 
+Funktion nur weil weiter außen irgendwo @racket[(define x 3)] steht. Dieses erwünschte Verhalten kann nur durch lexikalisches Scoping mit Shadowing 
+garantiert werden.
+
+Programmiersprachen, die es erlauben, lokal Namen zu definieren und lexikalisches Scoping mit Shadowing verwenden, nennt man auch Programmiersprachen mit @italic{Blockstruktur}.
+Blockstruktur war eine der großen Innovationen in der Programmiersprache ALGOL 60. Die meisten modernen Programmiersprachen heute haben Blockstruktur.
