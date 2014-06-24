@@ -117,6 +117,7 @@ match(@racket[(struct id (p-1 ... p-n))], @racket[(make-id v-1 ... v-n)]) =
 match(@racket[x],@racket[v]) = [@racket[x] := @racket[v]].
 
 match(...,...) = "no match" in allen anderen Fällen.
+
 Hierbei ist + ein Operator, der Substitutionen kombiniert. Das Ergebnis von s1+s2 ist
 "no match", falls s1 oder s2 "no match sind" oder s1 und s2 beide ein Mapping für den gleichen Namen definieren  aber
 diese auf unterschiedliche Werte abgebildet werden.

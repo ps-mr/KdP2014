@@ -105,7 +105,7 @@ wird.
 Wenn Sie einmal @racket[contains?] definiert haben, wird es nie wieder nötig sein,
 eine Funktion ähnlich wie die erste Variante von @racket[contains-dog?] zu definieren.
 
-@section{Funktionen als Funktionsparameter}
+@section[#:tag "funktionsparameter"]{Funktionen als Funktionsparameter}
 
 Betrachten Sie folgenden Code:
 

@@ -20,3 +20,5 @@ mit Beiträgen von Yufei Cai, Yi Dai und Tillmann Rendel
 @include-section["11-abstraction.scrbl"]
 @include-section["12-semanticsisl.scrbl"]
 @include-section["13-patternmatching.scrbl"]
+@include-section["14-generativerecursion.scrbl"]
+@include-section["15-accumulators.scrbl"]
