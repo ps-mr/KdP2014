@@ -191,7 +191,8 @@ fünf Fragen beantworten:
   @item{Ein trivial lösbares Problem ist die Frage nach einer Route von einem Knoten @racket[n] zu sich selbst.}
   @item{Die Lösung ist im trivialen Fall @racket[(list n)].}
   @item{Wenn das Problem nicht-trivial ist, können wir für jeden Nachbarn des Knoten das Problem generieren,
-        eine Route von dem Nachbarn zum Ziel zu finden. Wenn eines dieser Probleme erfolgreich gelöst wird,
+        eine Route von dem Nachbarn zum Ziel zu finden.}
+  @item{Wenn eines dieser Probleme erfolgreich gelöst wird,
         so ist das Gesamtergebnis der Weg zum Nachbarn gefolgt von der gefundenen Route vom Nachbarn aus.}
   @item{Das Terminierungsargument verschieben wir auf später.}]
 
@@ -378,3 +379,153 @@ aufruft, so tut es dies mit unveränderten Werten für @racket[G] und @racket[vi
 
 Insgesamt können wir festhalten, dass wir damit gezeigt haben, dass die Rekursionstiefe durch die Anzahl der
 Knoten des Graphen begrenzt ist und damit der Algorithmus für alle Graphen terminiert.
+
+@section{Entwurf von Funktionen mit Akkumulatoren}
+Nachdem wir zwei Beispiele gesehen haben, in denen ein Akkumulator sinnvoll ist, wollen wir nun diskutieren,
+wann und wie man im Allgemeinen Funktionen mit Akkumulatoren entwerfen sollte.
+
+Zunächst mal sollte man einen Funktionsentwurf mit Akkumulator nur dann in Erwägung ziehen, wenn der Versuch,
+mit dem Standard-Entwurfsrezept die Funktion zu entwerfen, gescheitert ist, oder zu zu kompliziertem oder zu
+langsamem Code führt.
+
+Die Schlüsselaktivitäten beim Entwurf einer Funktion mit Akkumulator sind: 1) zu erkennen, dass die
+Funktion einen Akkumulator benötigt (oder davon profitieren würde), und 2) zu verstehen, was genau
+der Akkumulator repräsentiert (die @italic{Akkumulator-Invariante}).
+
+@subsection{Wann braucht eine Funktion einen Akkumulator}
+Wir haben zwei Gründe gesehen, wieso Funktionen einen Akkumulator benötigen: 
+
+@itemize[#:style 'ordered
+@item{Wenn eine Funktion strukturell
+rekursiv ist und das Ergebnis des rekursiven Aufrufs wieder von einer rekursiven Hilfsfunktion verarbeitet wird.
+Häufig kann durch einen Akkumulator die Funktionalität der rekursiven Hilfsfunktion in die Hauptfunktion mit eingebaut
+werden und statt verschachtelter Iterationen (die häufig zu quadratischer Laufzeit führen) ist dann häufig eine
+einfache Iteration ausreichend.
+
+Hier ein weiteres Standardbeispiel:
+@#reader scribble/comment-reader
+(racketblock
+;; invert : (listof X)  ->  (listof X)
+;; to construct the reverse of alox
+;; structural recursion 
+(define (invert alox)
+  (cond
+    [(empty? alox) empty]
+    [else (make-last-item (first alox) (invert (rest alox)))]))
+
+;; make-last-item : X (listof X)  ->  (listof X)
+;; to add an-x to the end of alox
+;; structural recursion 
+(define (make-last-item an-x alox)
+  (cond
+    [(empty? alox) (list an-x)]
+    [else (cons (first alox) (make-last-item an-x (rest alox)))]))
+)    
+    }
+@item{Wenn wir eine generativ rekursive Funktion haben, dann kann es schwierig sein, diese Funktion so zu entwerfen,
+      dass sie für alle Eingaben eine korrekte Ausgabe berechnet. Im Beispiel oben haben wir gesehen, dass wir uns 
+      merken mussten, welche Knoten wir bereits besucht haben, um Terminierung bei Zyklen im Graph sicherzustellen.
+      Im Allgemeinen können wir mit einem Akkumulator beliebiges Wissen über die aktuelle Iteration akkumulieren und nutzen.
+      Wenn es also Wissen gibt, welches nicht lokal verfügbar ist sondern nur im Verlauf der Iteration angesammelt werden
+      kann, so ist ein Akkumulator das richtige Mittel.}
+]
+Diese beiden Möglichkeiten sind nicht die einzigen, aber sie sind sehr häufig.
+
+@subsection{Template für Funktionen mit Akkumulatoren}
+Wenn wir uns dafür entschieden haben, eine Funktion mit Akkumulator auszustatten, so ist es sinnvoll, ein Template
+für die Funktionsdefinition zu erstellen. Dieses sieht so aus, dass wir die Funktion mit Akkumulator zu einer mit @racket[local]
+definierten lokalen Funktion der eigentlich zu definierenden Funktion machen und diese Funktion dann
+im Body des @racket[local] Ausdrucks aufrufen. 
+
+Im Beispiel von oben sieht diese Template so aus:
+
+@#reader scribble/comment-reader
+(racketblock
+;; invert : (listof X)  ->  (listof X)
+;; to construct the reverse of alox
+(define (invert alox0)
+  (local (;; accumulator ...
+	  (define (rev alox accumulator)	
+	    (cond
+	      [(empty? alox) ...]
+	      [else 
+		... (rev (rest alox) ... ( first alox) ... accumulator)
+		... ])))
+    (rev alox0 ...)))
+)
+
+@subsection{Die Akkumulator-Invariante}
+Als nächstes ist es sinnvoll, die 
+Akkumulator-Invariante zu formulieren. Die Akkumulator-Invariante sagt, was der Akkumulator in jedem 
+Iterationsschritt repräsentiert.
+
+Zu diesem Zweck müssen wir uns überlegen, welche Daten wir akkumulieren wollen, so dass der Akkumulator
+uns bei der Implementation der Funktion hilft.
+
+Im Falle von @racket[invert] würde es uns helfen, wenn der Akkumulator die Listenelemente repräsentiert,
+die wir bisher gesehen haben (in umgekehrter Reihenfolge), denn dann können wir diese im @racket[empty]
+Fall zurückgeben statt @racket[make-last-item] aufzurufen.
+
+Diese Akkumulatorinvariante sollten wir in den Code hineinschreiben:
+
+@#reader scribble/comment-reader
+(racketblock
+;; invert : (listof X)  ->  (listof X)
+;; to construct the reverse of alox
+(define (invert alox0)
+  (local (;; ;; accumulator is the reversed list of all those items
+	  ;; on alox0 that precede alox
+	  (define (rev alox accumulator)	
+	    (cond
+	      [(empty? alox) ...]
+	      [else 
+		... (rev (rest alox) ... ( first alox) ... accumulator)
+		... ])))
+    (rev alox0 ...)))
+)
+
+@subsection{Implementation der Akkumulator-Invariante}
+
+Der nächste Schritt ist, dafür zu sorgen, dass die Akkumulator-Invariante auch tatsächlich eingehalten wird.
+Dies bedeutet, dass wir uns den initialen Wert für den Akkumulator überlegen müssen sowie die Berechnung, wie wir
+im rekursiven Aufruf den neuen Akkumulator erhalten. In unserem Beispiel ist offensichtlich der initiale
+Akkumulator @racket[empty] und der neue Akkumulator im rekursiven Aufruf @racket[(cons (first alox) accumulator)]:
+
+
+@#reader scribble/comment-reader
+(racketblock
+;; invert : (listof X)  ->  (listof X)
+;; to construct the reverse of alox
+(define (invert alox0)
+  (local (;; accumulator is the reversed list of all those items
+	  ;; on alox0 that precede alox
+	  (define (rev alox accumulator)	
+	    (cond
+	      [(empty? alox) ...]
+	      [else
+		... (rev (rest alox) (cons (first alox) accumulator))
+		...])))
+    (rev alox0 empty)))
+)
+
+@subsection{Nutzung des Akkumulators}
+
+Die Akkumulator-Invariante zu implementieren ändert noch nichts am externen Verhalten der Funktion.
+Der Sinn der ganzen Operation liegt darin, dass wir nun den Akkumulator nutzen können, um die Funktion
+zu implementieren. Wenn wir die Akkumulator-Invariante präzise formuliert haben, ist dieser
+Schritt typischerweise einfach:
+
+@#reader scribble/comment-reader
+(racketblock
+;; invert : (listof X)  ->  (listof X)
+;; to construct the reverse of alox
+(define (invert alox0)
+  (local (;; accumulator is the reversed list of all those items
+	  ;; on alox0 that precede alox
+	  (define (rev alox accumulator)	
+	    (cond
+	      [(empty? alox) accumulator]
+	      [else
+		(rev (rest alox) (cons (first alox) accumulator))])))
+    (rev alox0 empty)))
+)

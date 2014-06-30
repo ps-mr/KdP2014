@@ -31,10 +31,7 @@
 ; 1. Board representation
 ;      Types Cell, Row, Board, Direction
 ; 2. Game Logic
-;      bump-board-up: Board -> Board
-;      bump-board-down: Board -> Board
-;      bump-board-left: Board -> Board
-;      bump-board-right: Board -> Board
+;      bump-board: Board Direction -> Board
 ;      can-move: Board Direction -> Boolean
 ;      end-of-game: Board -> Boolean  
 ; 3. Addition of new cell at random location
