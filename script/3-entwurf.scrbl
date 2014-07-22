@@ -343,7 +343,7 @@ als eine Abfolge von Schritten beschreiben.
                 Formulieren Sie entsprechende Datendefinitionen (sofern nicht bereits vorhanden). Geben Sie für nicht-triviale 
                 Datendefinitionen einige interessante Beispiele für die Datendefinition an.}        
           @item{Schreiben Sie eine Signatur, eine Aufgabenbeschreibung, und einen Funktionskopf.
-                Eine @italic{Signatur} ist ein BSL Kommentar, der dem Leser sagt, wieviele und welchr Eingaben die Funktion konsumiert
+                Eine @italic{Signatur} ist ein BSL Kommentar, der dem Leser sagt, wieviele und welche Eingaben die Funktion konsumiert
                 und was für eine Ausgabe sie produziert. Hier sind zwei Beispiele:
                 @itemlist[
                           @item{Für eine Funktion, die einen String konsumiert und eine Zahl produziert:
