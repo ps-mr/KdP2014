@@ -17,7 +17,7 @@ Repertoire an Datentypen zu haben. In diesem Kapitel schauen wir uns an,
 wie man mit Datentypen unterschiedliche Situationen unterscheiden kann und wie diese Datentypen
 den Entwurf von Programmen beeinflussen.
 
-@section{Auzählungstypen}
+@section{Aufzählungstypen}
 Häufig hat man den Fall, dass ein Datentyp nur eine endliche aufzählbare Menge von Werten enthält.
 Wir nennen solche Datentypen @italic{Aufzählungstypen} oder @italic{Enumerationstypen}.
 Hier ist ein Beispiel, wie ein Aufzählungstyp definiert wird:
@@ -68,7 +68,7 @@ erhält. @racket[MouseEvent] ist folgendermaßen definiert:
 )
 
 Es kann auch sein, dass ein Funktionsparameter einen Aufzählungstyp hat, aber die Funktion trotzdem keine Fallunterscheidung vornimmt, weil
-hierzu eine Hilfsfunktion aufgerufen wird. Dennoch ist es eine gute Heuristik, im Schritt 3 des Entwurfsrezepts 
+hierzu eine Hilfsfunktion aufgerufen wird. Dennoch ist es eine gute Heuristik, im Schritt 4 des Entwurfsrezepts 
 aus Abschnitt @secref{entwurfsrezept} mit einem Funktionstemplate zu starten, welches alle Fälle des Parameters unterscheidet.
 Beispielsweise würde das Template für die @racket[traffic-light-next] Funktion von oben so aussehen:
 
@@ -172,7 +172,7 @@ Funktionen, die jedoch die zusätzliche Struktur des Intervalls benötigen, enth
 
 Es empfiehlt sich, diesen @racket[cond] Ausdruck im Rahmen der Templatekonstruktion aus dem Entwurfsrezept direkt in das Template mit
 aufzunehmen. Allerdings findet die Fallunterscheidung nicht notwendigerweise als erstes statt sondern kann auch tiefer
-im Funktionsbody stattfinden. Dies bietet sich in unserem Beispiel an, denn wir haben gegen das DRY Prinzip verstossen (Wenn wir
+im Funktionsbody stattfinden. Dies bietet sich in unserem Beispiel an, denn wir haben gegen das DRY Prinzip verstoßen (Wenn wir
 die Farbe des Textes beispielsweise auf "red" ändern möchten, müssten wir drei Zeilen ändern). Deshalb ist es vorteilhaft,
 den konditionalen Ausdruck nach innen zu ziehen:
 
