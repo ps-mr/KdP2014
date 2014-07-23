@@ -184,7 +184,7 @@ Das Nichtterminal @nonterm{program} steht für die Syntax ganzer Programme; @non
 
 Die geschweiften Klammern um Teilsequenzen wie in @kleeneplus[@BNF-group[@BNF-seq[lb @nonterm{e} @nonterm{e} rb ] ]] dienen dazu,
 um den  @kleenestar[] oder @kleeneplus[] Operator auf eine ganze Sequenz von Terminalsymbolen und Nichtterminalen anzuwenden und nicht nur
-auf ein einzelens Nichtterminal. In diesem Beispiel bedeutet es, dass 1 oder mehr Vorkommen von @BNF-seq[lb @nonterm{e} @nonterm{e} rb ]
+auf ein einzelnes Nichtterminal. In diesem Beispiel bedeutet es, dass 1 oder mehr Vorkommen von @BNF-seq[lb @nonterm{e} @nonterm{e} rb ]
 erwartet werden.
 
 Die Produktionen für einige Nichtterminale, deren genaue Form nicht interessant ist, wurden in der Grammatik ausgelassen: 
