@@ -211,7 +211,7 @@ in BSL nehmen, einen Quote-Operator drumherumschreiben, und Sie erhalten eine S-
 Diese Eigenschaft, die manchmal @italic{Homoikonizität} genannt, macht es besonders leicht, Programme als Daten zu 
 repräsentieren und Programme zu schreiben, die die Repräsentation eines Programms als Eingabe bekommen oder als Ausgabe produzieren.
 In Scheme und (vollem) Racket gibt es sogar eine Funktion @racket[eval], die eine Repräsentation eines Ausdrucks als S-Expression
-als Eingabe bekommt und die diesen Ausdruck dann interpretiert und das Ergebnis zurückliefert. Beispielswäre würde @racket[(eval '(+ 1 1))] 
+als Eingabe bekommt und die diesen Ausdruck dann interpretiert und das Ergebnis zurückliefert. Beispielsweise würde @racket[(eval '(+ 1 1))] 
 Ergebnis @racket[2] liefern. Damit wird es möglich, Programme zur Laufzeit zu berechnen und dann direkt auszuführen - eine sehr mächtige aber
 auch sehr gefährliche Möglichkeit.
 
