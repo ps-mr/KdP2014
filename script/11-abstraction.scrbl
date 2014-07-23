@@ -673,7 +673,7 @@ Die zweite Facette der Redundanz, die wir durch lokale Konstanten vermeiden kön
 das mehrfache Auswerten eines Ausdrucks vermeiden können. Dies liegt daran, dass der Wert einer lokale Konstante nur einmal bei ihrer Definition
 berechnet wird und im folgenden nur das bereits berechnete Ergebnis verwendet wird. 
 Im Beispiel @racket[power8-fast] haben wir gesehen, dass wir dadurch die Anzahl
-der Multiplikationen von 8 auf 3 senken konnten. Im Allgemeinen "lohnt" sich die Definition einer lokalen  le aus Sicht der dynamischen Redundanz dann,
+der Multiplikationen von 8 auf 3 senken konnten. Im Allgemeinen "lohnt" sich die Definition einer lokalen Konstante aus Sicht der dynamischen Redundanz dann,
 wenn sie mehr als einmal ausgewertet wird.
 
 Zusammengefasst haben lokale Konstanten also den gleichen Zweck wie nicht-lokale (globale) Konstanten, nämlich der Benennung von Konstanten bzw. Zwischenergebnissen und der Vermeidung
@@ -813,7 +813,7 @@ auch gleich etwas besser strukturieren), und dann diese Funktion zurückgeben:
 
 Was für eine Art von Wert ist es, der von @racket[derivative] zurückgegeben wird?
 
-Nehmen wir es an, es wäre sowas wie die Definition von @racket[g], also 
+Nehmen wir an, es wäre sowas wie die Definition von @racket[g], also 
 @racket[(define (g x) (/ (delta-f-x x) delta-x))]. Wenn dem so wäre, was passiert mit
 der Konstanten @racket[delta-x] und der Funktion @racket[delta-f-x]? Diese sind ja
 in @racket[derivative] nur lokal gebunden. Was passiert beispielsweise bei
