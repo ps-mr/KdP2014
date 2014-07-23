@@ -133,8 +133,8 @@ wir können die ursprüngliche Signatur leicht rekonstruieren:
     (relative-2-absolute-with-acc alon 0)))
 )
 
-Einige Experimente mit @racket[time] bestätigen, dass @racket[relative-2-absoluste-2]
-viel effizienter als @racket[relative-2-absoluste] ist und statt einem quadratischen
+Einige Experimente mit @racket[time] bestätigen, dass @racket[relative-2-absolute-2]
+viel effizienter als @racket[relative-2-absolute] ist und statt einem quadratischen
 nur noch ein lineares Wachstum der Laufzeit aufweist.
 
 @section{Beispiel: Suche in einem Graphen}
