@@ -18,7 +18,7 @@ für all die Dinge, die sich ändern, zu definieren. Für unseren Ball mit konst
 sind dies zwei Eigenschaften: Die aktuelle Position sowie die Richtung, in die sich der Ball bewegt.
 
 @margin-note{Wäre es sinnvoll, Varianten des "universe" Teachpacks zu haben, in denen der WorldState
-             zum Beispiel durch zwei Werte repräsentiert wird?}}
+             zum Beispiel durch zwei Werte repräsentiert wird?}
 Der WorldState im "universe" Teachpack ist allerdings nur ein einzelner Wert. Die Werte, die
 wir bisher kennen, sind allerdings stets einzelne Zahlen, Bilder, Strings oder Wahrheitswerte
 --- daran ändern auch Summentypen nichts. Wir müssen also irgendwie mehrere Werte so zusammenstellen
@@ -30,7 +30,7 @@ aber für die praktische Programmierung sind diese Techniken ungeeignet.
 
 Jede höhere Programmiersprache hat Mechanismen, um mehrere Daten zu einem Datum zusammenzupacken und
 bei Bedarf wieder in seine Bestandteile zu zerlegen. In BSL gibt es zu diesem Zweck
-@italic{Strukturen} (@italic{structs}}. Man nennt Strukturdefinitionen auch oft @italic{Produkte}, weil 
+@italic{Strukturen} (@italic{structs}). Man nennt Strukturdefinitionen auch oft @italic{Produkte}, weil 
 Sie dem Kreuzprodukt von Mengen in der Mathematik entsprechen. Aus dieser Analogie ergibt sich übrigens auch
 der Name 'Summentyp' aus dem letzten Kapitel, denn die Vereinigung von Mengen wird auch als die Summe der
 Mengen bezeichnet. In manchen Sprachen werden Strukturen auch @italic{Records} genannt.
@@ -71,7 +71,7 @@ berechnet. Hier ist die Signatur, Aufgabenbeschreibung und der Header einer solc
 (define (distance-to-0 a-posn) 0)
 )
 
-Was neu ist an dieser Funktion ist, dass sie nur einen Parameter, @racket[a-posn], hat, in dem aber 
+Neu an dieser Funktion ist, dass sie nur einen Parameter, @racket[a-posn], hat, in dem aber 
 beide Koordinaten übergeben werden. Hier sind einige Tests die verdeutlichen, was @racket[distance-to-0]
 berechnen soll. Die Distanz kann natürlich über die bekannte Pythagaros Formel berechnet werden.
 
@@ -170,7 +170,7 @@ Auf Basis dieser Definitionen können wir beispielsweise berechnen, wie sich der
    (+ (posn-y loc) (vel-deltay v))))
 )   
 
-Wie können wir nun ein sich bewegendes Balls selber repräsentieren? Wir haben gesehen, dass dieser durch seinen Ort und seinen
+Wie können wir nun einen sich bewegenden Ball selbst repräsentieren? Wir haben gesehen, dass dieser durch seinen Ort und seinen
 Bewegungsvektor beschrieben wird. Eine Möglichkeit der Repräsentation wäre diese:
 @racketblock[(define-struct ball (x y deltax deltay))]
 
@@ -207,7 +207,7 @@ Im Allgemeinen kann man durch Verschachtelung von Strukturen also Daten hierarch
 
 @section{Datendefinitionen für Strukturen}
 
-Der Zweck einer Datendefinition für Strukturen ist, zu beschreiben, welche Art von Daten jedes Feld
+Der Zweck einer Datendefinition für Strukturen ist zu beschreiben, welche Art von Daten jedes Feld
 enthalten darf. Für einige Strukturen ist die dazugehörige Datendefinition recht offensichtlich:
 
 @#reader scribble/comment-reader

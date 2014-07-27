@@ -392,7 +392,7 @@ als eine Abfolge von Schritten beschreiben.
                 dass der Test immer erfolgreich ist.
                               
                               }
-          @item{Im dritten Schritt überlegen Sie sich, welche der Ihnen zur Verfügung stehenden Eingabedaten und ggf. Hilfsfunktionen und Variablen Sie zur Berechnung benötigen.
+          @item{Im vierten Schritt überlegen Sie sich, welche der Ihnen zur Verfügung stehenden Eingabedaten und ggf. Hilfsfunktionen und Variablen Sie zur Berechnung benötigen.
                 Sie ersetzen den Dummy-Wert aus dem zweiten Schritt mit einem @italic{Template} (Schablone), in dem die Eingabedaten/Funktionen/Variablen von oben vorkommen.
                 Im Moment sieht dieses Template so aus, dass einfach die Eingabedaten/Funktionen/Variablen durch @racket[...] voneinander getrennt unsortiert im 
                 Funktionsbody stehen. Später werden wir interessantere Templates kennenlernen.
